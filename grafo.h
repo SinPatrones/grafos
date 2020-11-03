@@ -6,6 +6,7 @@
 #include <string>
 #include <stdlib.h>
 #include <time.h>
+#include <map>
 
 using namespace std;
 
@@ -22,6 +23,8 @@ public:
     Vertice(T valor){
         this->valor = valor;
     }
+
+
 };
 
 
@@ -48,31 +51,32 @@ public:
 template <typename T>
 class Grafo{
 private:
-    vector<Vertice<T> *> vertices;
+    //vector<Vertice<T> *> vertices;
+    map<T, Vertice<T> *> vertices;
     unsigned int cantidadVertices;
     unsigned int cantidadAristas;
     bool dirigido;
     bool multigrafo;
     bool permitirLazos;
     bool autoinsertar;
+    bool ponderado;
     vector<T> valoresVertices;
 public:
-    Grafo(bool autoinsertar = false, bool permitirLazos = false, bool dirigido = false, bool multigrafo = false){
+    Grafo(bool autoinsertar = false, bool permitirLazos = false, bool dirigido = false, bool ponderado = false, bool multigrafo = false){
         this->cantidadVertices = 0;
         this->cantidadAristas = 0;
         this->dirigido = dirigido;
         this->multigrafo = multigrafo;
         this->permitirLazos = permitirLazos;
         this->autoinsertar = autoinsertar;
+        this->ponderado = ponderado;
     }
 
     Vertice<T> * encontrarVertice(T valor){
-        for(auto it = this->vertices.begin(); it != this->vertices.end(); it++){
-            if ((*it)->valor == valor){
-                return *it;
-            }
-        }
-        return NULL;
+        auto itEncontrado = this->vertices.find(valor);
+        if (itEncontrado == this->vertices.end())
+            return NULL;
+        return itEncontrado->second;
     }
 
     Vertice<T> * encontrarArista(T inicio, T final){
@@ -94,17 +98,17 @@ public:
     }
 
     void mostrarNodos(){
-        for (auto it = this->vertices.begin(); it != this->vertices.end(); it++){
-            cout << (*it)->valor << ", ";
+        for (auto& vertice: this->vertices){
+            cout << vertice.first << ", ";
         }
         cout << endl;
     }
 
     void mostrarListaDeAdyacencia(){
-        for (auto itVertices = this->vertices.begin(); itVertices != this->vertices.end(); itVertices++){
-            cout << (*itVertices)->valor << "= ";
-            for (auto itAristas = (*itVertices)->aristas.begin(); itAristas != (*itVertices)->aristas.end(); itAristas++){
-                cout << (*itAristas)->extremo->valor << ", ";
+        for (auto& vertice: this->vertices){
+            cout << vertice.first << " = ";
+            for (auto& aristas: vertice.second->aristas){
+                cout << aristas->extremo->valor << ", ";
             }
             cout << endl;
         }
@@ -127,31 +131,39 @@ public:
             salida << "digraph regexp {\n";
             if (!this->dirigido) // graficara con flechas
                 salida << "edge [dir=none];\n";
-            for (auto it = this->vertices.begin(); it != this->vertices.end(); it++){
-                salida << "\"" << (*it) << "\"" << " [fixedsize=true label=\"" << (*it)->valor << "\"]" << ";\n";
+            for (auto& vertice: this->vertices){
+                salida << "\"" << vertice.second << "\"" << " [fixedsize=true label=\"" << vertice.first << "\"]" << ";\n";
             }
 
             if (!this->dirigido){
                 vector<T> valoresNodos;
-                for (auto itVertices = this->vertices.begin(); itVertices != this->vertices.end(); itVertices++){
-                    for (auto itAristas = (*itVertices)->aristas.begin(); itAristas != (*itVertices)->aristas.end(); itAristas++){
+                for (auto& vertice: this->vertices){
+                    for (auto& arista: vertice.second->aristas){
                         bool aristaYaDibujada = false;
                         for (int idx = 0; idx < valoresNodos.size(); idx++){
-                            if ((*itAristas)->extremo->valor == valoresNodos[idx]){
+                            if (arista->extremo->valor == valoresNodos[idx]){
                                 aristaYaDibujada = true;
                                 break;
                             }
                         }
                         if (!aristaYaDibujada){
-                            salida << "\"" << (*itVertices) << "\"" << " -> " << "\"" << (*itAristas)->extremo << "\"" << ";\n";
-                            valoresNodos.push_back((*itVertices)->valor);
+                            salida << "\"" << vertice.second << "\"" << " -> " << "\"" << arista->extremo << "\"";
+                            if (this->ponderado){
+                                salida << " [ label = \"" << arista->peso << "\" ]";
+                            }
+                            salida << ";\n";
+                            valoresNodos.push_back(vertice.first);
                         }
                     }
                 }
             }else{
-                for (auto itVertices = this->vertices.begin(); itVertices != this->vertices.end(); itVertices++){
-                    for (auto itAristas = (*itVertices)->aristas.begin(); itAristas != (*itVertices)->aristas.end(); itAristas++){
-                        salida << "\"" << (*itVertices) << "\"" << " -> " << "\"" << (*itAristas)->extremo << "\"" << ";\n";
+                for (auto& vertice: this->vertices){
+                    for (auto& arista: vertice.second->aristas){
+                        salida << "\"" << vertice.second << "\"" << " -> " << "\"" << arista->extremo << "\"";
+                        if (this->ponderado){
+                            salida << " [ label = \"" << arista->peso << "\" ]";
+                        }
+                        salida << ";\n";
                     }
                 }
             }
@@ -172,7 +184,7 @@ public:
             return NULL;
         }
         Vertice<T> * nuevoVertice = new Vertice<T>(valor);
-        this->vertices.push_back(nuevoVertice);
+        this->vertices[valor] = nuevoVertice;
         this->cantidadVertices++;
         this->valoresVertices.push_back(valor);
 
@@ -180,11 +192,12 @@ public:
     }
 
     bool insertarArista(T inicio, T fin, float peso = 0){
-        Vertice<T> * inicioEncontrado = this->encontrarVertice(inicio);
-        Vertice<T> * finEncontrado = this->encontrarVertice(fin);
         if (!this->permitirLazos && (inicio == fin)){
             return false;
         }
+
+        Vertice<T> * inicioEncontrado = this->encontrarVertice(inicio);
+        Vertice<T> * finEncontrado = this->encontrarVertice(fin);
 
         if (inicioEncontrado){
             if (finEncontrado){
@@ -243,25 +256,46 @@ public:
     }
 
     void crearGrafoCompleto(unsigned int cantidadVertices = 0){
-        // n (n-1)/2
         if (cantidadVertices != 0){
             this->crearVerticesAleatorios(cantidadVertices);
         }
-        for (auto itVertices = this->vertices.begin(); itVertices != this->vertices.end(); itVertices++){
-            for (auto itExtremo = this->vertices.begin(); itExtremo != this->vertices.end(); itExtremo++){
-                if (itVertices != itExtremo){
-                    this->insertarArista((*itVertices)->valor, (*itExtremo)->valor);
+        srand(time(NULL));
+        for (auto& vertice: this->vertices){
+            for (auto& verticeExtremo: this->vertices){
+                if (vertice.first != verticeExtremo.first){
+                    if (this->ponderado){
+                        float peso = 1 + rand() % (100);
+                        this->insertarArista(vertice.first, verticeExtremo.first, peso);
+                    }else{
+                        this->insertarArista(vertice.first, verticeExtremo.first);
+                    }
                 }
             }
         }
     }
 
     void crearAristasAleatorias(unsigned int cantidadAristas){
-        srand(time(NULL));
-        while(this->obtenerCantidadAristas() < cantidadAristas){
-            int posInicio = rand() % (this->vertices.size());
-            int posFinal = rand() % (this->vertices.size());
-            this->insertarArista(this->valoresVertices[posInicio], this->valoresVertices[posFinal]);
+        if (cantidadAristas ==  ((cantidadAristas * (cantidadAristas - 1)) / 2)){
+            this->crearGrafoCompleto();
+        }else{
+            if (this->vertices.size() > 0){
+                if (this->ponderado){
+                    srand(time(NULL));
+                    while(this->obtenerCantidadAristas() < cantidadAristas){
+                        int posInicio = rand() % (this->vertices.size());
+                        int posFinal = rand() % (this->vertices.size());
+                        float peso = 1 + rand() % (100);
+                        this->insertarArista(this->valoresVertices[posInicio], this->valoresVertices[posFinal], peso);
+                    }
+                }else{
+                    srand(time(NULL));
+                    while(this->obtenerCantidadAristas() < cantidadAristas){
+                        int posInicio = rand() % (this->vertices.size());
+                        int posFinal = rand() % (this->vertices.size());
+                        this->insertarArista(this->valoresVertices[posInicio], this->valoresVertices[posFinal]);
+                    }
+                }
+            }
         }
     }
 
@@ -271,6 +305,10 @@ public:
 
     bool esMultigrafo(){
         return this->multigrafo;
+    }
+
+    bool esPonderado(){
+        return this->ponderado;
     }
 };
 

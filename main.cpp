@@ -7,14 +7,16 @@
 using namespace std;
 
 int main(){
-    Grafo<int> g1(true);
+    Grafo<int> g1(true, false, false, true);
 
-    g1.insertarArista(23,11);
-    g1.insertarArista(23,110);
-    g1.insertarArista(23,19);
+    g1.crearGrafoCompleto(4);
 
+    g1.mostrarNodos();
+    cout << "--------------------------------\n";
     g1.mostrarListaDeAdyacencia();
+    cout << "-------------------------------\n";
     g1.crearArchivoDot();
+
 
     return 1;
 }

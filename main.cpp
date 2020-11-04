@@ -20,17 +20,22 @@ int main(){
     g1.insertarArista('D', 'F');
 
     Grafo<char> g2;
+    Grafo<char> g3;
 
     cout << "GENERANDO ARBOL DE EXPANSION MINIMA" << endl;
     g2 = g1.generarArbolMinimoPorProfundida('G');
+    g3 = g1.generarArbolMinimoPorAnchura('G');
 
     cout << "\n--------------------------------\n";
     cout << g1;
     cout << "-------------------------------\n";
     cout << g2;
     cout << "-------------------------------\n";
+    cout << g3;
+    cout << "-------------------------------\n";
     g1.crearArchivoDot();
     g2.crearArchivoDot();
+    g3.crearArchivoDot();
 
     return 1;
 }

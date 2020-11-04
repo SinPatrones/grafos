@@ -116,7 +116,6 @@ public:
     }
 
     Vertice<T> * encontrarVertice(T valor){
-        cout << "-- Buscando " << valor << endl;
         auto itEncontrado = this->vertices.find(valor);
         if (itEncontrado == this->vertices.end())
             return NULL;
@@ -228,7 +227,7 @@ public:
 
     Vertice<T> * insertarNodo(T valor){
         if (this->encontrarVertice(valor)){
-            return NULL;
+            return this->encontrarVertice(valor);
         }
         Vertice<T> * nuevoVertice = new Vertice<T>(valor);
         this->vertices[valor] = nuevoVertice;
@@ -402,6 +401,7 @@ public:
     }
 
     Grafo<T> & operator = (const Grafo & otro){
+        cout << "** Entrando en operador de asignacion" << endl;
         this->dirigido = otro.dirigido;
         this->multigrafo = otro.multigrafo;
         this->ponderado = otro.ponderado;
@@ -411,13 +411,17 @@ public:
         this->autoinsertar = otro.autoinsertar;
         this->ponderado = otro.ponderado;
         this->valoresVertices = otro.valoresVertices;
-        this->nombreArchivo = this->nombreArchivo + "_copia";
+        this->nombreArchivo = otro.nombreArchivo + "_copia";
+        cout << "** se copiaron los miembros datos" << endl;
 
         for (auto & vertice: otro.vertices){
+            cout << "** - Entrando al vertice del OTRO: " << vertice.first << endl;
             for (auto & arista: vertice.second->aristas){
+                cout << "** -- Entrando a las aristas de; " << vertice.first << endl;
                 this->insertarArista(vertice.second->valor, arista->extremo->valor, arista->peso);
             }
         }
+        cout << "Se termino de copiar todo" << endl;
 
         return *this;
     }
@@ -452,7 +456,7 @@ public:
     }
 
     Grafo<T> generarArbolMinimoPorProfundida(T valorVerticeInicial){
-        Grafo<T> arbolExpansionMinima(this->nombreArchivo + "_adexm", true);
+        Grafo<T> arbolExpansionMinima(this->nombreArchivo + "_adexp", true);
         stack<Vertice<T> *> padres;
 
         Vertice<T> * verticeInicial = this->encontrarVertice(valorVerticeInicial);
@@ -478,7 +482,6 @@ public:
                     padres.push(verticeInicial);
                     verticeInicial = candidato->extremo;
                     aristas.clear();
-                    arbolExpansionMinima.mostrarListaDeAdyacencia();
                     for(auto & arista: verticeInicial->aristas){
                         if (arbolExpansionMinima.vertices.find(arista->extremo->valor) == arbolExpansionMinima.vertices.end()){
                             aristas.push_back(arista);
@@ -488,6 +491,26 @@ public:
             }
         }
 
+        return arbolExpansionMinima;
+    }
+
+    Grafo<T> generarArbolMinimoPorAnchura(T valorVerticeInicial){
+        Grafo<T> arbolExpansionMinima(this->nombreArchivo + "_adexa", true);
+
+        Vertice<T> * verticeInicial;
+        arbolExpansionMinima.insertarNodo(valorVerticeInicial);
+        arbolExpansionMinima.mostrarListaDeAdyacencia();
+
+        int idxVerticesAgregados = 0;
+
+        while(arbolExpansionMinima.cantidadVertices != this->cantidadVertices){
+            verticeInicial = this->encontrarVertice(arbolExpansionMinima.valoresVertices[idxVerticesAgregados++]);
+            for (auto & arista: verticeInicial->aristas){
+                if (arbolExpansionMinima.vertices.find(arista->extremo->valor) == arbolExpansionMinima.vertices.end()){
+                    arbolExpansionMinima.insertarArista(verticeInicial->valor, arista->extremo->valor);
+                }
+            }
+        }
         return arbolExpansionMinima;
     }
 

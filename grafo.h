@@ -217,7 +217,6 @@ public:
             cout << "------------ FINALIZADA LA CREACION DEL ARCHIVO DOT ------------\n";
             cout << "------------ CREANDO ARCHIVO IMAGEN ------------\n";
             string comando = "dot " + this->nombreArchivo + ".dot -o " + this->nombreArchivo + ".pdf -Tpdf";
-            cout << "GENERANDO: " << comando;
             system(comando.c_str());
             cout << "------------ ARCHIVO IMAGEN CREADA ------------\n";
         }else{
@@ -225,7 +224,7 @@ public:
         }
     }
 
-    Vertice<T> * insertarNodo(T valor){
+    Vertice<T> * insertarVertice(T valor){
         if (this->encontrarVertice(valor)){
             return this->encontrarVertice(valor);
         }
@@ -275,7 +274,7 @@ public:
                 }
             }else{ // si no se encuentra el nodo final
                 if (this->autoinsertar){
-                    Vertice<T> * verticeFinal = this->insertarNodo(fin);
+                    Vertice<T> * verticeFinal = this->insertarVertice(fin);
                     Arista<T> * nuevaArista = new Arista<T>(verticeFinal);
                     inicioEncontrado->aristas.push_back(nuevaArista);
                     (*inicioEncontrado)++;
@@ -292,8 +291,8 @@ public:
             }
         }else{
             if (this->autoinsertar){
-                Vertice<T> * nuevoInicio = this->insertarNodo(inicio);
-                Vertice<T> * nuevoFin = this->insertarNodo(fin);
+                Vertice<T> * nuevoInicio = this->insertarVertice(inicio);
+                Vertice<T> * nuevoFin = this->insertarVertice(fin);
                 nuevoInicio->aristas.push_back(new Arista<T>(nuevoFin, peso));
                 (*nuevoInicio)++;
                 ++(*nuevoFin);
@@ -321,7 +320,7 @@ public:
         srand(time(NULL));
         while(this->cantidadVertices < cantidadVertices){
             unsigned int valorArista = 1 + rand() % (999 - 0);
-            this->insertarNodo(valorArista);
+            this->insertarVertice(valorArista);
         }
     }
 
@@ -382,7 +381,7 @@ public:
     }
 
     friend T operator << (Grafo<T> & grafo,const T p){
-        grafo.insertarNodo(p);
+        grafo.insertarVertice(p);
         return p;
     }
 
@@ -401,7 +400,6 @@ public:
     }
 
     Grafo<T> & operator = (const Grafo & otro){
-        cout << "** Entrando en operador de asignacion" << endl;
         this->dirigido = otro.dirigido;
         this->multigrafo = otro.multigrafo;
         this->ponderado = otro.ponderado;
@@ -412,16 +410,12 @@ public:
         this->ponderado = otro.ponderado;
         this->valoresVertices = otro.valoresVertices;
         this->nombreArchivo = otro.nombreArchivo + "_copia";
-        cout << "** se copiaron los miembros datos" << endl;
 
         for (auto & vertice: otro.vertices){
-            cout << "** - Entrando al vertice del OTRO: " << vertice.first << endl;
             for (auto & arista: vertice.second->aristas){
-                cout << "** -- Entrando a las aristas de; " << vertice.first << endl;
                 this->insertarArista(vertice.second->valor, arista->extremo->valor, arista->peso);
             }
         }
-        cout << "Se termino de copiar todo" << endl;
 
         return *this;
     }
@@ -455,6 +449,30 @@ public:
         return false;
     }
 
+    void vaciarGrafo(){
+        vector<int> i;
+        this->vertices.clear();
+        this->cantidadAristas = 0;
+        this->cantidadVertices = 0;
+        this->valoresVertices.clear();
+    }
+
+    Grafo<T> exportarAtributos(){
+        Grafo<T> tmp;
+        tmp.dirigido = this->dirigido;
+        tmp.multigrafo = this->multigrafo;
+        tmp.ponderado = this->ponderado;
+        tmp.cantidadAristas = this->cantidadAristas;
+        tmp.cantidadVertices = this->cantidadVertices;
+        tmp.permitirLazos = this->permitirLazos;
+        tmp.autoinsertar = this->autoinsertar;
+        tmp.ponderado = this->ponderado;
+        tmp.nombreArchivo = this->nombreArchivo + "_copiaDatos";
+
+        return tmp;
+    }
+
+
     Grafo<T> generarArbolMinimoPorProfundida(T valorVerticeInicial){
         Grafo<T> arbolExpansionMinima(this->nombreArchivo + "_adexp", true);
         stack<Vertice<T> *> padres;
@@ -463,7 +481,7 @@ public:
         if (!verticeInicial){
             return arbolExpansionMinima;
         }
-        arbolExpansionMinima.insertarNodo(valorVerticeInicial);
+        arbolExpansionMinima.insertarVertice(valorVerticeInicial);
         padres.push(verticeInicial);
         while(!padres.empty()){
             verticeInicial = padres.top();
@@ -498,7 +516,7 @@ public:
         Grafo<T> arbolExpansionMinima(this->nombreArchivo + "_adexa", true);
 
         Vertice<T> * verticeInicial;
-        arbolExpansionMinima.insertarNodo(valorVerticeInicial);
+        arbolExpansionMinima.insertarVertice(valorVerticeInicial);
         arbolExpansionMinima.mostrarListaDeAdyacencia();
 
         int idxVerticesAgregados = 0;
@@ -518,7 +536,7 @@ public:
 
 template <typename G, typename V1>
 void insertarCaminoEn(G & grafo, const V1 & unico){
-    grafo.insertarNodo(unico);
+    grafo.insertarVertice(unico);
 }
 
 template <typename G, typename V1, typename V2>

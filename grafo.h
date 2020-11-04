@@ -9,6 +9,7 @@
 #include <map>
 #include <stack>
 #include <queue>
+#include <list>
 
 using namespace std;
 
@@ -96,9 +97,10 @@ private:
     bool permitirLazos;
     bool autoinsertar;
     bool ponderado;
+    string nombreArchivo;
     vector<T> valoresVertices;
 public:
-    Grafo(bool autoinsertar = false, bool permitirLazos = false, bool dirigido = false, bool ponderado = false, bool multigrafo = false){
+    Grafo(string nombreArchivo = "tmp", bool autoinsertar = false, bool permitirLazos = false, bool dirigido = false, bool ponderado = false, bool multigrafo = false){
         this->cantidadVertices = 0;
         this->cantidadAristas = 0;
         this->dirigido = dirigido;
@@ -106,9 +108,15 @@ public:
         this->permitirLazos = permitirLazos;
         this->autoinsertar = autoinsertar;
         this->ponderado = ponderado;
+        this->nombreArchivo = nombreArchivo;
+    }
+
+    Grafo(const Grafo & original){
+        (*this) = original;
     }
 
     Vertice<T> * encontrarVertice(T valor){
+        cout << "-- Buscando " << valor << endl;
         auto itEncontrado = this->vertices.find(valor);
         if (itEncontrado == this->vertices.end())
             return NULL;
@@ -161,10 +169,11 @@ public:
 
     void crearArchivoDot(){
         ofstream salida;
-        salida.open("migrafo.dot", ios::out);
+        salida.open(this->nombreArchivo + ".dot", ios::out);
         if (salida.is_open()){
             cout << "------------ CREANDO ARCHIVO DOT ------------\n";
-            salida << "digraph regexp {\n";
+            salida << "digraph ";
+            salida << this->nombreArchivo << " {\n";
             if (!this->dirigido) // graficara con flechas
                 salida << "edge [dir=none];\n";
             for (auto& vertice: this->vertices){
@@ -208,7 +217,9 @@ public:
             salida.close();
             cout << "------------ FINALIZADA LA CREACION DEL ARCHIVO DOT ------------\n";
             cout << "------------ CREANDO ARCHIVO IMAGEN ------------\n";
-            system("dot migrafo.dot -o migrafo.pdf -Tpdf");
+            string comando = "dot " + this->nombreArchivo + ".dot -o " + this->nombreArchivo + ".pdf -Tpdf";
+            cout << "GENERANDO: " << comando;
+            system(comando.c_str());
             cout << "------------ ARCHIVO IMAGEN CREADA ------------\n";
         }else{
             cout << endl << "No se pudo crear archivo" << endl;
@@ -390,6 +401,27 @@ public:
         return o;
     }
 
+    Grafo<T> & operator = (const Grafo & otro){
+        this->dirigido = otro.dirigido;
+        this->multigrafo = otro.multigrafo;
+        this->ponderado = otro.ponderado;
+        this->cantidadAristas = otro.cantidadAristas;
+        this->cantidadVertices = otro.cantidadVertices;
+        this->permitirLazos = otro.permitirLazos;
+        this->autoinsertar = otro.autoinsertar;
+        this->ponderado = otro.ponderado;
+        this->valoresVertices = otro.valoresVertices;
+        this->nombreArchivo = this->nombreArchivo + "_copia";
+
+        for (auto & vertice: otro.vertices){
+            for (auto & arista: vertice.second->aristas){
+                this->insertarArista(vertice.second->valor, arista->extremo->valor, arista->peso);
+            }
+        }
+
+        return *this;
+    }
+
     bool existeCiclo(T valorVerticeInicio, T valorVerticeFinal){
         Vertice<T> * verticeFinal = this->encontrarVertice(valorVerticeFinal);
 
@@ -417,6 +449,46 @@ public:
             }
         }
         return false;
+    }
+
+    Grafo<T> generarArbolMinimoPorProfundida(T valorVerticeInicial){
+        Grafo<T> arbolExpansionMinima(this->nombreArchivo + "_adexm", true);
+        stack<Vertice<T> *> padres;
+
+        Vertice<T> * verticeInicial = this->encontrarVertice(valorVerticeInicial);
+        if (!verticeInicial){
+            return arbolExpansionMinima;
+        }
+        arbolExpansionMinima.insertarNodo(valorVerticeInicial);
+        padres.push(verticeInicial);
+        while(!padres.empty()){
+            verticeInicial = padres.top();
+            padres.pop();
+            list<Arista<T> *> aristas;
+            for(auto & arista: verticeInicial->aristas){
+                if (arbolExpansionMinima.vertices.find(arista->extremo->valor) == arbolExpansionMinima.vertices.end()){
+                    aristas.push_back(arista);
+                }
+            }
+            while(!aristas.empty()){
+                Arista<T> * candidato = aristas.front();
+                aristas.pop_front();
+                if (arbolExpansionMinima.vertices.find(candidato->extremo->valor) == arbolExpansionMinima.vertices.end()){
+                    arbolExpansionMinima.insertarArista(verticeInicial->valor, candidato->extremo->valor);
+                    padres.push(verticeInicial);
+                    verticeInicial = candidato->extremo;
+                    aristas.clear();
+                    arbolExpansionMinima.mostrarListaDeAdyacencia();
+                    for(auto & arista: verticeInicial->aristas){
+                        if (arbolExpansionMinima.vertices.find(arista->extremo->valor) == arbolExpansionMinima.vertices.end()){
+                            aristas.push_back(arista);
+                        }
+                    }
+                }
+            }
+        }
+
+        return arbolExpansionMinima;
     }
 
 };

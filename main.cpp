@@ -7,20 +7,30 @@
 using namespace std;
 
 int main(){
-    Grafo<string> g1(true, false);
+    Grafo<char> g1("g1", true);
 
-    insertarCaminoEn(g1, "armando", "juan", "luis", "diego", "sofia", "luis", "carlos", "diego", "armando");
+    g1.insertarArista('G', 'A');
+    g1.insertarArista('G', 'B');
+    g1.insertarArista('G', 'C');
+    g1.insertarArista('A', 'B');
+    g1.insertarArista('A', 'C');
+    g1.insertarArista('C', 'D');
+    g1.insertarArista('C', 'E');
+    g1.insertarArista('C', 'F');
+    g1.insertarArista('D', 'F');
 
-    /*bool hayCiclo = g1.existeCiclo("armado", "juan");
-    if (hayCiclo)
-        cout << "HAY CICLO ENTRE armado y juan" << endl;
-    else
-        cout << "NOO HAY CICLO ENTRE 23 y 30" << endl;
-*/
+    Grafo<char> g2;
+
+    cout << "GENERANDO ARBOL DE EXPANSION MINIMA" << endl;
+    g2 = g1.generarArbolMinimoPorProfundida('G');
+
     cout << "\n--------------------------------\n";
     cout << g1;
     cout << "-------------------------------\n";
+    cout << g2;
+    cout << "-------------------------------\n";
     g1.crearArchivoDot();
+    g2.crearArchivoDot();
 
     return 1;
 }

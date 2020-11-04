@@ -7,16 +7,20 @@
 using namespace std;
 
 int main(){
-    Grafo<int> g1(true, false, false, true);
+    Grafo<string> g1(true, false);
 
-    g1.crearGrafoCompleto(4);
+    insertarCaminoEn(g1, "armando", "juan", "luis", "diego", "sofia", "luis", "carlos", "diego", "armando");
 
-    g1.mostrarNodos();
-    cout << "--------------------------------\n";
-    g1.mostrarListaDeAdyacencia();
+    /*bool hayCiclo = g1.existeCiclo("armado", "juan");
+    if (hayCiclo)
+        cout << "HAY CICLO ENTRE armado y juan" << endl;
+    else
+        cout << "NOO HAY CICLO ENTRE 23 y 30" << endl;
+*/
+    cout << "\n--------------------------------\n";
+    cout << g1;
     cout << "-------------------------------\n";
     g1.crearArchivoDot();
-
 
     return 1;
 }

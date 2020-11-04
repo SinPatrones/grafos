@@ -7,34 +7,61 @@
 #include <stdlib.h>
 #include <time.h>
 #include <map>
+#include <stack>
+#include <queue>
 
 using namespace std;
 
 template <typename T>
 class Arista;
 
+template <typename T>
+class Grafo;
+
 // CLASE VERTICE
 template <typename T>
 class Vertice{
-public:
+private:
     T valor;
+    unsigned int gradoPositivo;
+    unsigned int gradoNegativo;
     vector<Arista<T> *> aristas;
 
+public:
     Vertice(T valor){
         this->valor = valor;
+        this->gradoPositivo = 0;
+        this->gradoNegativo = 0;
+    }
+    vector<Arista<T> *> obtenerAristas(){
+        return this->aristas;
+    }
+    T obtenerValor(){
+        return this->valor;
     }
 
+    Vertice<T> * operator ++( int ){
+        this->gradoPositivo++;
+        return this;
+    }
 
+    Vertice<T> * operator ++(){
+        this->gradoNegativo++;
+        return this;
+    }
+
+    friend class Grafo<T>;
 };
 
 
 // CLASE ARISTA
 template <typename T>
 class Arista{
-public:
+private:
     Vertice<T> * extremo;
     float peso;
 
+public:
     Arista(Vertice<T> * arista, float nuevoPeso){
         this->extremo = arista;
         this->peso = nuevoPeso;
@@ -44,6 +71,15 @@ public:
         this->extremo = arista;
         this->peso = 0;
     }
+
+    Vertice<T> * obtenerExtremo(){
+        return this->extremo;
+    }
+
+    float obtenerPeso(){
+        return this->peso;
+    }
+    friend class Grafo<T>;
 };
 
 
@@ -204,17 +240,25 @@ public:
                 if (this->encontrarArista(inicio, fin)){
                     if (this->multigrafo){
                         inicioEncontrado->aristas.push_back(new Arista<T>(finEncontrado, peso));
+                        (*inicioEncontrado)++;
+                        ++(*finEncontrado);
                         if (!this->dirigido){
                             finEncontrado->aristas.push_back(new Arista<T>(inicioEncontrado, peso));
+                            (*finEncontrado)++;
+                            ++(*inicioEncontrado);
                         }
                         this->cantidadAristas++;
                         return true;
                     }
                     return false;
-                }else{
+                }else{ // Si la arista a insertar no existe
                     inicioEncontrado->aristas.push_back(new Arista<T>(finEncontrado, peso));
+                    (*inicioEncontrado)++;
+                    ++(*finEncontrado);
                     if (!this->dirigido){
                         finEncontrado->aristas.push_back(new Arista<T>(inicioEncontrado, peso));
+                        (*finEncontrado)++;
+                        ++(*inicioEncontrado);
                     }
                     this->cantidadAristas++;
                     return true;
@@ -224,8 +268,12 @@ public:
                     Vertice<T> * verticeFinal = this->insertarNodo(fin);
                     Arista<T> * nuevaArista = new Arista<T>(verticeFinal);
                     inicioEncontrado->aristas.push_back(nuevaArista);
+                    (*inicioEncontrado)++;
+                    ++(*verticeFinal);
                     if (!this->dirigido){
                         verticeFinal->aristas.push_back(new Arista<T>(inicioEncontrado, peso));
+                        (*verticeFinal)++;
+                        ++(*inicioEncontrado);
                     }
                     this->cantidadAristas++;
                     return true;
@@ -237,14 +285,26 @@ public:
                 Vertice<T> * nuevoInicio = this->insertarNodo(inicio);
                 Vertice<T> * nuevoFin = this->insertarNodo(fin);
                 nuevoInicio->aristas.push_back(new Arista<T>(nuevoFin, peso));
+                (*nuevoInicio)++;
+                ++(*nuevoFin);
                 if (!this->dirigido){
                     nuevoFin->aristas.push_back(new Arista<T>(nuevoInicio, peso));
+                    (*nuevoFin)++;
+                    ++(*nuevoInicio);
                 }
                 this->cantidadAristas++;
                 return true;
             }
         }
         return false;
+    }
+
+    unsigned int obtenerGradoPositivoVertice(T valor){
+        return this->encontrarVertice(valor)->gradoPositivo;
+    }
+
+    unsigned int obtenerGradoNegativoVertice(T valor){
+        return this->encontrarVertice(valor)->gradoNegativo;
     }
 
     void crearVerticesAleatorios(unsigned int cantidadVertices = 10){
@@ -310,6 +370,72 @@ public:
     bool esPonderado(){
         return this->ponderado;
     }
+
+    friend T operator << (Grafo<T> & grafo,const T p){
+        grafo.insertarNodo(p);
+        return p;
+    }
+
+    friend ostream& operator << (ostream &o,const Grafo<T> &grafo){
+        o << endl;
+        for (auto& vertice: grafo.vertices){
+            o << vertice.first << " = ";
+            for (auto& aristas: vertice.second->obtenerAristas()){
+                o << aristas->obtenerExtremo()->obtenerValor() << ", ";
+            }
+            o << endl;
+        }
+        o << endl;
+
+        return o;
+    }
+
+    bool existeCiclo(T valorVerticeInicio, T valorVerticeFinal){
+        Vertice<T> * verticeFinal = this->encontrarVertice(valorVerticeFinal);
+
+        queue<Arista<T> *> aristasPorVisitar;
+        for(auto & arista: verticeFinal->aristas){
+            if (arista->extremo->valor != valorVerticeInicio){
+                aristasPorVisitar.push(arista);
+            }
+        }
+
+        map<T, Vertice<T> *> verticesVisitados;
+        verticesVisitados[valorVerticeFinal] = verticeFinal;
+
+        while(!aristasPorVisitar.empty()){
+            Arista<T> * aristaAux = aristasPorVisitar.front();
+            aristasPorVisitar.pop();
+
+            if (aristaAux->extremo->valor == valorVerticeInicio)
+                return true;
+
+            for(auto & aristaPendiente: aristaAux->extremo->aristas){
+                if (verticesVisitados[aristaPendiente->extremo->valor] == NULL){
+                    aristasPorVisitar.push(aristaPendiente);
+                }
+            }
+        }
+        return false;
+    }
+
 };
+
+template <typename G, typename V1>
+void insertarCaminoEn(G & grafo, const V1 & unico){
+    grafo.insertarNodo(unico);
+}
+
+template <typename G, typename V1, typename V2>
+void insertarCaminoEn(G & grafo, const V1 & primero, const V2 & segundo){
+    grafo.insertarArista(primero, segundo);
+}
+
+template <typename G, typename V1, typename V2, typename V3, typename ... V>
+void insertarCaminoEn(G & grafo, const V1 & primero, const V2 & segundo, const V3 & tercero, const V &... restoValores){
+    grafo.insertarArista(primero, segundo);
+    insertarCaminoEn(grafo, segundo, tercero, restoValores...);
+}
+
 
 #endif // GRAFO_H

@@ -390,6 +390,10 @@ public:
         return this->ponderado;
     }
 
+    void cambiarNombre(string nuevoNombre){
+        this->nombreArchivo = nuevoNombre;
+    }
+
     friend T operator << (Grafo<T> & grafo,const T p){
         grafo.insertarVertice(p);
         return p;
@@ -431,7 +435,7 @@ public:
         return *this;
     }
 
-    bool existeCiclo(T valorVerticeInicio, T valorVerticeFinal){
+    bool existeCamino(T valorVerticeInicio, T valorVerticeFinal){
         if (this->cantidadVertices < 3)
             return false;
 
@@ -473,8 +477,7 @@ public:
         this->valoresVertices.clear();
     }
 
-    Grafo<T> exportarAtributos(){
-        Grafo<T> tmp;
+    void exportarAtributosA(Grafo<T> & tmp){
         tmp.dirigido = this->dirigido;
         tmp.multigrafo = this->multigrafo;
         tmp.ponderado = this->ponderado;
@@ -484,8 +487,6 @@ public:
         tmp.autoinsertar = this->autoinsertar;
         tmp.ponderado = this->ponderado;
         tmp.nombreArchivo = this->nombreArchivo + "_copia";
-
-        return tmp;
     }
 
     void guardarEnArchivo(){
@@ -571,7 +572,7 @@ public:
 
         // recorremos todas las aristas ordenadas
         for (auto & candidato: listaAristas){
-            if (!grafoKruskal.existeCiclo(candidato.first->valor, candidato.second->extremo->valor) && !grafoKruskal.encontrarArista(candidato.first->valor, candidato.second->extremo->valor)){
+            if (!grafoKruskal.existeCamino(candidato.first->valor, candidato.second->extremo->valor) && !grafoKruskal.encontrarArista(candidato.first->valor, candidato.second->extremo->valor)){
                 grafoKruskal.insertarArista(candidato.first->valor, candidato.second->extremo->valor, candidato.second->peso);
             }
             if (grafoKruskal.cantidadVertices == this->cantidadVertices) // termina cuando tienen misma cantidad de vertices

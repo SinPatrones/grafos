@@ -10,6 +10,7 @@
 #include <stack>
 #include <queue>
 #include <list>
+#include <algorithm>
 
 using namespace std;
 
@@ -63,8 +64,8 @@ private:
     float peso;
 
 public:
-    Arista(Vertice<T> * arista, float nuevoPeso){
-        this->extremo = arista;
+    Arista(Vertice<T> * vertice, float nuevoPeso){
+        this->extremo = vertice;
         this->peso = nuevoPeso;
     }
 
@@ -80,9 +81,13 @@ public:
     float obtenerPeso(){
         return this->peso;
     }
+
     friend class Grafo<T>;
 };
 
+bool compararAristas(pair<Vertice<int> *, Arista<int> *> & a, pair<Vertice<int> *, Arista<int> *> & b){
+    return a.second->obtenerPeso() < b.second->obtenerPeso();
+}
 
 // CLASE GRAFO
 template <typename T>
@@ -144,10 +149,13 @@ public:
         for (auto& vertice: this->vertices){
             cout << vertice.first << ", ";
         }
+
         cout << endl;
     }
 
     void mostrarListaDeAdyacencia(){
+        cout << endl;
+        cout << "-- MATRIZ DE ADYACENCIA DE " << this->nombreArchivo << endl;
         for (auto& vertice: this->vertices){
             cout << vertice.first << " = ";
             for (auto& aristas: vertice.second->aristas){
@@ -175,6 +183,7 @@ public:
             salida << this->nombreArchivo << " {\n";
             if (!this->dirigido) // graficara con flechas
                 salida << "edge [dir=none];\n";
+
             for (auto& vertice: this->vertices){
                 salida << "\"" << vertice.second << "\"" << " [fixedsize=true label=\"" << vertice.first << "\"]" << ";\n";
             }
@@ -275,7 +284,7 @@ public:
             }else{ // si no se encuentra el nodo final
                 if (this->autoinsertar){
                     Vertice<T> * verticeFinal = this->insertarVertice(fin);
-                    Arista<T> * nuevaArista = new Arista<T>(verticeFinal);
+                    Arista<T> * nuevaArista = new Arista<T>(verticeFinal, peso);
                     inicioEncontrado->aristas.push_back(nuevaArista);
                     (*inicioEncontrado)++;
                     ++(*verticeFinal);
@@ -344,7 +353,8 @@ public:
     }
 
     void crearAristasAleatorias(unsigned int cantidadAristas){
-        if (cantidadAristas ==  ((cantidadAristas * (cantidadAristas - 1)) / 2)){
+        cout << "SOLICITADO " << cantidadAristas << " - MAXIMO " << (this->cantidadVertices * (this->cantidadVertices - 1)) / 2 << endl;;
+        if (cantidadAristas >=  ((this->cantidadVertices * (this->cantidadVertices - 1)) / 2)){
             this->crearGrafoCompleto();
         }else{
             if (this->vertices.size() > 0){
@@ -387,6 +397,7 @@ public:
 
     friend ostream& operator << (ostream &o,const Grafo<T> &grafo){
         o << endl;
+        o << "-- MATRIZ DE ADYACENCIA DE " << grafo.nombreArchivo << endl;
         for (auto& vertice: grafo.vertices){
             o << vertice.first << " = ";
             for (auto& aristas: vertice.second->obtenerAristas()){
@@ -421,23 +432,28 @@ public:
     }
 
     bool existeCiclo(T valorVerticeInicio, T valorVerticeFinal){
-        Vertice<T> * verticeFinal = this->encontrarVertice(valorVerticeFinal);
+        if (this->cantidadVertices < 3)
+            return false;
+
+        Vertice<T> * verticeInicio = this->encontrarVertice(valorVerticeInicio);
+        if (!verticeInicio || !this->encontrarVertice(valorVerticeFinal))
+            return false;
 
         queue<Arista<T> *> aristasPorVisitar;
-        for(auto & arista: verticeFinal->aristas){
-            if (arista->extremo->valor != valorVerticeInicio){
+        for(auto & arista: verticeInicio->aristas){
+            if (arista->extremo->valor != valorVerticeFinal){
                 aristasPorVisitar.push(arista);
             }
         }
 
         map<T, Vertice<T> *> verticesVisitados;
-        verticesVisitados[valorVerticeFinal] = verticeFinal;
+        verticesVisitados[valorVerticeInicio] = verticeInicio;
 
         while(!aristasPorVisitar.empty()){
             Arista<T> * aristaAux = aristasPorVisitar.front();
             aristasPorVisitar.pop();
 
-            if (aristaAux->extremo->valor == valorVerticeInicio)
+            if (aristaAux->extremo->valor == valorVerticeFinal)
                 return true;
 
             for(auto & aristaPendiente: aristaAux->extremo->aristas){
@@ -467,14 +483,21 @@ public:
         tmp.permitirLazos = this->permitirLazos;
         tmp.autoinsertar = this->autoinsertar;
         tmp.ponderado = this->ponderado;
-        tmp.nombreArchivo = this->nombreArchivo + "_copiaDatos";
+        tmp.nombreArchivo = this->nombreArchivo + "_copia";
 
         return tmp;
     }
 
+    void guardarEnArchivo(){
+        ofstream salida;
+        salida.open(this->nombreArchivo + ".gph", ios::out);
+
+
+
+    }
 
     Grafo<T> generarArbolMinimoPorProfundida(T valorVerticeInicial){
-        Grafo<T> arbolExpansionMinima(this->nombreArchivo + "_adexp", true);
+        Grafo<T> arbolExpansionMinima(this->nombreArchivo + "_adexp", true, false, true);
         stack<Vertice<T> *> padres;
 
         Vertice<T> * verticeInicial = this->encontrarVertice(valorVerticeInicial);
@@ -530,6 +553,32 @@ public:
             }
         }
         return arbolExpansionMinima;
+    }
+
+    Grafo<T> generarKruskal(){
+        Grafo<T> grafoKruskal("kruskal",true,false,false,true);
+
+        // Agrupamos todas las aristas, para poder ordenarlas
+        vector<pair<Vertice<T> *, Arista<T> *>> listaAristas;
+        for (auto & vertice: this->vertices){
+            for (auto & arista: vertice.second->aristas){
+                pair<Vertice<T> *, Arista<T> *> verticeAB (vertice.second, arista);
+                listaAristas.push_back(verticeAB);
+            }
+        }
+        // Ordenando aristas de menor a mayor
+        sort(listaAristas.begin(), listaAristas.end(), compararAristas);
+
+        // recorremos todas las aristas ordenadas
+        for (auto & candidato: listaAristas){
+            if (!grafoKruskal.existeCiclo(candidato.first->valor, candidato.second->extremo->valor) && !grafoKruskal.encontrarArista(candidato.first->valor, candidato.second->extremo->valor)){
+                grafoKruskal.insertarArista(candidato.first->valor, candidato.second->extremo->valor, candidato.second->peso);
+            }
+            if (grafoKruskal.cantidadVertices == this->cantidadVertices) // termina cuando tienen misma cantidad de vertices
+                break;
+        }
+
+        return grafoKruskal;
     }
 
 };

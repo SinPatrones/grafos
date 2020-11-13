@@ -3,39 +3,30 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
+#include <string>
 
 using namespace std;
 
 int main(){
-    Grafo<char> g1("g1", true);
 
-    g1.insertarArista('G', 'A');
-    g1.insertarArista('G', 'B');
-    g1.insertarArista('G', 'C');
-    g1.insertarArista('A', 'B');
-    g1.insertarArista('A', 'C');
-    g1.insertarArista('C', 'D');
-    g1.insertarArista('C', 'E');
-    g1.insertarArista('C', 'F');
-    g1.insertarArista('D', 'F');
+    Grafo<int> g1("migrafo", true,false,false,true);
 
-    Grafo<char> g2;
-    Grafo<char> g3;
+    g1.insertarArista(59,100,9);
+    g1.insertarArista(20,100,12);
+    g1.insertarArista(59,10,10);
+    g1.insertarArista(59,20,50);
+    g1.insertarArista(59,50,5);
+    g1.insertarArista(30,50,30);
+    g1.insertarArista(80,50,19);
+    g1.insertarArista(80,20,40);
+    g1.insertarArista(10,80,10);
+    g1.insertarArista(10,30,5);
 
-    cout << "GENERANDO ARBOL DE EXPANSION MINIMA" << endl;
-    g2 = g1.generarArbolMinimoPorProfundida('G');
-    g3 = g1.generarArbolMinimoPorAnchura('G');
+    auto g2 = g1.generarKruskal();
 
-    cout << "\n--------------------------------\n";
-    cout << g1;
-    cout << "-------------------------------\n";
-    cout << g2;
-    cout << "-------------------------------\n";
-    cout << g3;
-    cout << "-------------------------------\n";
-    g1.crearArchivoDot();
     g2.crearArchivoDot();
-    g3.crearArchivoDot();
+
+    g1.crearArchivoDot();
 
     return 1;
 }

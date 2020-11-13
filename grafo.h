@@ -481,20 +481,81 @@ public:
         tmp.dirigido = this->dirigido;
         tmp.multigrafo = this->multigrafo;
         tmp.ponderado = this->ponderado;
-        tmp.cantidadAristas = this->cantidadAristas;
-        tmp.cantidadVertices = this->cantidadVertices;
         tmp.permitirLazos = this->permitirLazos;
         tmp.autoinsertar = this->autoinsertar;
-        tmp.ponderado = this->ponderado;
         tmp.nombreArchivo = this->nombreArchivo + "_copia";
+    }
+
+    void mostrarPropiedades(){
+        cout << endl;
+        cout << ">>>>> PROPIEDADES <<<<<" << endl;
+        cout << "Nombre: " << this->nombreArchivo << endl;
+        cout << "Dirigido: " << this->dirigido << endl;
+        cout << "Multigrafo: " << this->multigrafo << endl;
+        cout << "Ponderado: " << this->ponderado << endl;
+        cout << "Permitir Lazos: " << this->permitirLazos << endl;
+        cout << "Permitir autoinsertar: " << this->autoinsertar << endl;
+        cout << "<<<<<<<<<>>>>>>>>" << endl;
     }
 
     void guardarEnArchivo(){
         ofstream salida;
         salida.open(this->nombreArchivo + ".gph", ios::out);
+        salida << this->dirigido << endl;
+        salida << this->multigrafo << endl;
+        salida << this->ponderado << endl;
+        salida << this->permitirLazos << endl;
+        salida << this->autoinsertar << endl;
+        salida << "-\n";
 
+        for (auto & vertice: this->vertices){
+            salida << vertice.first << endl;
+            for (auto & arista: vertice.second->aristas){
+                salida << arista->extremo->valor << endl;
+                salida << arista->peso << endl;
+            }
+            salida << "-" << endl;
+        }
 
+        salida.flush();
+        salida.close();
+    }
 
+    void leerDesdeArchivo(string nombreArchivo){
+        ifstream entrada;
+        entrada.open(nombreArchivo, ios::in);
+        char buffer[100];
+        // Si es dirigido
+        entrada.getline(buffer,100);
+        this->dirigido = atoi(buffer);
+        // si es multigrafo
+        entrada.getline(buffer,100);
+        this->multigrafo = atoi(buffer);
+        // si es ponderado
+        entrada.getline(buffer,100);
+        this->ponderado = atoi(buffer);
+        // permite lazos
+        entrada.getline(buffer,100);
+        this->permitirLazos = atoi(buffer);
+        // Si permite autoinsertar
+        entrada.getline(buffer,100);
+        this->autoinsertar = atoi(buffer);
+        // TERMINAMOS DE LEER LA CABECERA DEL ARCHIVO
+        T valorVertice;
+        while (!entrada.eof()) {
+            entrada.getline(buffer, 100);
+            if (strcmp(buffer, "-") == 0){
+                entrada.getline(buffer, 100);
+                valorVertice = atoi(buffer);
+            }else{
+                T valorVerticeFinal = atoi(buffer);
+                entrada.getline(buffer, 100);
+                float peso = atof(buffer);
+                this->insertarArista(valorVertice, valorVerticeFinal, peso);
+            }
+        }
+        // cerrando archivo
+        entrada.close();
     }
 
     Grafo<T> generarArbolMinimoPorProfundida(T valorVerticeInicial){

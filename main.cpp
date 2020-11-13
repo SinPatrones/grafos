@@ -22,11 +22,16 @@ int main(){
     g1.insertarArista(10,80,10);
     g1.insertarArista(10,30,5);
 
-    auto g2 = g1.generarKruskal();
-
-    g2.crearArchivoDot();
-
+    g1.mostrarListaDeAdyacencia();
+    //g1.guardarEnArchivo();
     g1.crearArchivoDot();
+
+
+    Grafo<int> g2;
+    g2.leerDesdeArchivo("migrafo.gph");
+    g2.mostrarListaDeAdyacencia();
+    g2.cambiarNombre("recuperado");
+    g2.crearArchivoDot();
 
     return 1;
 }

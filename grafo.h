@@ -85,10 +85,24 @@ public:
     friend class Grafo<T>;
 };
 
-bool compararAristas(pair<Vertice<int> *, Arista<int> *> & a, pair<Vertice<int> *, Arista<int> *> & b){
+// Función usada para KRUSKAL
+bool compararAristas(pair<Vertice<char> *, Arista<char> *> & a, pair<Vertice<char> *, Arista<char> *> & b){
     return a.second->obtenerPeso() < b.second->obtenerPeso();
 }
 
+// Funcion usada para PRIM
+/*bool compararAristasPrim(pair<pair<pair<int,int>, float>, int> & a, pair<pair<pair<int,int>, float>, int> & b){
+    if (a.first.second == b.first.second){
+        return a.second < b.second;
+    }
+    return a.second < b.second;
+}*/
+bool compararAristasPrim(pair<pair<pair<char,char>, float>, int> & a, pair<pair<pair<char,char>, float>, int> & b){
+    if (a.first.second == b.first.second){
+        return a.second < b.second;
+    }
+    return a.first.second < b.first.second;
+}
 // CLASE GRAFO
 template <typename T>
 class Grafo{
@@ -223,11 +237,8 @@ public:
 
             salida << "}\n";
             salida.close();
-            cout << "------------ FINALIZADA LA CREACION DEL ARCHIVO DOT ------------\n";
-            cout << "------------ CREANDO ARCHIVO IMAGEN ------------\n";
             string comando = "dot " + this->nombreArchivo + ".dot -o " + this->nombreArchivo + ".pdf -Tpdf";
             system(comando.c_str());
-            cout << "------------ ARCHIVO IMAGEN CREADA ------------\n";
         }else{
             cout << endl << "No se pudo crear archivo" << endl;
         }
@@ -456,6 +467,7 @@ public:
         while(!aristasPorVisitar.empty()){
             Arista<T> * aristaAux = aristasPorVisitar.front();
             aristasPorVisitar.pop();
+            verticesVisitados[aristaAux->extremo->valor] = aristaAux->extremo;
 
             if (aristaAux->extremo->valor == valorVerticeFinal)
                 return true;
@@ -618,29 +630,74 @@ public:
     }
 
     Grafo<T> generarKruskal(){
+        cout << "--- Generando Kruskal ---" << endl;
         Grafo<T> grafoKruskal("kruskal",true,false,false,true);
 
-        // Agrupamos todas las aristas, para poder ordenarlas
-        vector<pair<Vertice<T> *, Arista<T> *>> listaAristas;
-        for (auto & vertice: this->vertices){
-            for (auto & arista: vertice.second->aristas){
-                pair<Vertice<T> *, Arista<T> *> verticeAB (vertice.second, arista);
-                listaAristas.push_back(verticeAB);
+        if (this->ponderado){
+            // Agrupamos todas las aristas, para poder ordenarlas
+            vector<pair<Vertice<T> *, Arista<T> *>> listaAristas;
+            for (auto & vertice: this->vertices){
+                for (auto & arista: vertice.second->aristas){
+                    pair<Vertice<T> *, Arista<T> *> verticeAB (vertice.second, arista);
+                    listaAristas.push_back(verticeAB);
+                }
+            }
+            // Ordenando aristas de menor a mayor
+            sort(listaAristas.begin(), listaAristas.end(), compararAristas);
+            // recorremos todas las aristas ordenadas
+            for (auto & candidato: listaAristas){
+                if (!grafoKruskal.existeCamino(candidato.first->valor, candidato.second->extremo->valor)
+                        &&
+                        !grafoKruskal.encontrarArista(candidato.first->valor, candidato.second->extremo->valor)){
+                    grafoKruskal.insertarArista(candidato.first->valor, candidato.second->extremo->valor, candidato.second->peso);
+                }
+                if (grafoKruskal.cantidadVertices == this->cantidadVertices) // termina cuando tienen misma cantidad de vertices
+                    break;
             }
         }
-        // Ordenando aristas de menor a mayor
-        sort(listaAristas.begin(), listaAristas.end(), compararAristas);
-
-        // recorremos todas las aristas ordenadas
-        for (auto & candidato: listaAristas){
-            if (!grafoKruskal.existeCamino(candidato.first->valor, candidato.second->extremo->valor) && !grafoKruskal.encontrarArista(candidato.first->valor, candidato.second->extremo->valor)){
-                grafoKruskal.insertarArista(candidato.first->valor, candidato.second->extremo->valor, candidato.second->peso);
-            }
-            if (grafoKruskal.cantidadVertices == this->cantidadVertices) // termina cuando tienen misma cantidad de vertices
-                break;
-        }
-
         return grafoKruskal;
+    }
+
+    Grafo<T> generarPrim(T valorVerticeInical = NULL){
+        cout << "--- Generando PRIM ---" << endl;
+        Grafo<T> grafoPrim("prim", true, false, this->dirigido, true);
+        // El grafo tiene que ser ponderado
+        if(this->ponderado){
+            Vertice<T> * verticeInical;
+            if (valorVerticeInical != NULL){
+                verticeInical = this->encontrarVertice(valorVerticeInical);
+            }else{
+                verticeInical = this->vertices[(*this->vertices.begin()).first];
+            }
+
+            grafoPrim.insertarVertice(verticeInical->valor);
+
+            while(grafoPrim.cantidadAristas != (this->cantidadVertices - 1)){
+                // [<<<vInicio, vFinal>,PESO>, ORDEN>, ...]
+                vector<pair<pair<pair<T,T>, float>, int>> aristas;
+                int orden = 1;
+                for(T & valorVertice: grafoPrim.valoresVertices){
+                    Vertice<T> * vAux = this->encontrarVertice(valorVertice);
+                    for (auto & arista: vAux->aristas){
+                        if (grafoPrim.encontrarVertice(arista->extremo->valor) == NULL){
+                            pair<T,T> paresVertices(valorVertice, arista->extremo->valor);
+                            pair<pair<T,T>, float> paresYpesos(paresVertices, arista->peso);
+                            pair<pair<pair<T,T>, float>, int> aristaPrim(paresYpesos, orden);
+
+                            aristas.push_back(aristaPrim);
+                        }
+                    }
+                    orden++;
+                }
+
+                sort(aristas.begin(), aristas.end(), compararAristasPrim);
+
+                auto aristaElegida = aristas.at(0);
+                grafoPrim.insertarArista(aristaElegida.first.first.first, aristaElegida.first.first.second, aristaElegida.first.second);
+            }
+
+        }
+        return grafoPrim;
     }
 
 };

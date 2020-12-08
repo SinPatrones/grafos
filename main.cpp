@@ -9,27 +9,22 @@ using namespace std;
 
 int main(){
 
-    Grafo<char> g1("migrafo", true,false,false,true);
+    Grafo<int> g1("coloracion", true);
 
-    g1.insertarArista('e','a',3);
-    g1.insertarArista('e','c',6);
-    g1.insertarArista('e','f',2);
-    g1.insertarArista('a','b',4);
-    g1.insertarArista('a','c',15);
-    g1.insertarArista('c','d',10);
-    g1.insertarArista('c','f',3);
-    g1.insertarArista('f','d',6);
-    g1.insertarArista('b','d',5);
+    g1.insertarArista(5, 4);
+    g1.insertarArista(5, 6);
+    g1.insertarArista(5, 2);
+    g1.insertarArista(6, 7);
+    g1.insertarArista(6, 1);
+    g1.insertarArista(6, 4);
+    g1.insertarArista(4, 3);
+    g1.insertarArista(3, 1);
+    g1.insertarArista(3, 2);
+    g1.insertarArista(7, 1);
+    g1.insertarArista(2, 1);
+
+    g1.colorearGrafoMMI();
 
     g1.crearArchivoDot();
-
-    Grafo<char> g2;
-    Grafo<char> g3;
-    g2 = g1.generarPrim('e');
-    g3 = g1.generarKruskal();
-
-    g2.crearArchivoDot();
-    g3.crearArchivoDot();
-
     return 1;
 }

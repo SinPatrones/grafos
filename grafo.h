@@ -1,5 +1,6 @@
 #ifndef GRAFO_H
 #define GRAFO_H
+
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -11,6 +12,15 @@
 #include <queue>
 #include <list>
 #include <algorithm>
+
+enum Color{
+    sincolor,
+    amarillo, // 1
+    verde, // 2
+    rojo,  // 3
+    morado, // 4
+    azul, // 5
+};
 
 using namespace std;
 
@@ -28,6 +38,7 @@ private:
     unsigned int gradoPositivo;
     unsigned int gradoNegativo;
     vector<Arista<T> *> aristas;
+    Color valorColor = sincolor;
 
 public:
     Vertice(T valor){
@@ -85,19 +96,14 @@ public:
     friend class Grafo<T>;
 };
 
+typedef char TipoDato;
 // Función usada para KRUSKAL
-bool compararAristas(pair<Vertice<char> *, Arista<char> *> & a, pair<Vertice<char> *, Arista<char> *> & b){
+bool compararAristas(pair<Vertice<TipoDato> *, Arista<TipoDato> *> & a, pair<Vertice<TipoDato> *, Arista<TipoDato> *> & b){
     return a.second->obtenerPeso() < b.second->obtenerPeso();
 }
 
 // Funcion usada para PRIM
-/*bool compararAristasPrim(pair<pair<pair<int,int>, float>, int> & a, pair<pair<pair<int,int>, float>, int> & b){
-    if (a.first.second == b.first.second){
-        return a.second < b.second;
-    }
-    return a.second < b.second;
-}*/
-bool compararAristasPrim(pair<pair<pair<char,char>, float>, int> & a, pair<pair<pair<char,char>, float>, int> & b){
+bool compararAristasPrim(pair<pair<pair<TipoDato, TipoDato>, float>, int> & a, pair<pair<pair<TipoDato, TipoDato>, float>, int> & b){
     if (a.first.second == b.first.second){
         return a.second < b.second;
     }
@@ -199,7 +205,35 @@ public:
                 salida << "edge [dir=none];\n";
 
             for (auto& vertice: this->vertices){
-                salida << "\"" << vertice.second << "\"" << " [fixedsize=true label=\"" << vertice.first << "\"]" << ";\n";
+                /*
+                 * sincolor,
+                    amarillo, // 1
+                    verde, // 2
+                    rojo,  // 3
+                    morado, // 4
+                    azul, // 5
+                 */
+                string color = ", style=filled, fillcolor=";
+                switch (vertice.second->valorColor) {
+                case amarillo:
+                    color += "yellow";
+                    break;
+                case verde:
+                    color += "green";
+                    break;
+                case rojo:
+                    color += "red";
+                    break;
+                case morado:
+                    color += "purple";
+                    break;
+                case azul:
+                    color += "blue";
+                    break;
+                default:
+                    color = "";
+                }
+                salida << "\"" << vertice.second << "\"" << " [fixedsize=true label=\"" << vertice.first << "\"" << color << "]" << ";\n";
             }
 
             if (!this->dirigido){
@@ -651,6 +685,7 @@ public:
                         !grafoKruskal.encontrarArista(candidato.first->valor, candidato.second->extremo->valor)){
                     grafoKruskal.insertarArista(candidato.first->valor, candidato.second->extremo->valor, candidato.second->peso);
                 }
+                // grafoKruskal.cantidadAristas == (this->cantidadVertices - 1)
                 if (grafoKruskal.cantidadVertices == this->cantidadVertices) // termina cuando tienen misma cantidad de vertices
                     break;
             }
@@ -700,6 +735,127 @@ public:
         return grafoPrim;
     }
 
+    void colorearGrafoVoraz(){
+        vector<T> verticesOrdenados = {1,2,3,4,5,6,7};
+        vector<Color> coloresOrdenados = {verde, rojo, amarillo};
+
+        // Coloreando el primer vertice
+        this->vertices[verticesOrdenados.at(0)]->valorColor = verde;
+        cout << "VERTICE : " << this->vertices[verticesOrdenados.at(0)]->valor << " = " << this->vertices[verticesOrdenados.at(0)]->valorColor;
+        cout << endl << endl;
+        for (int idx = 1; idx < verticesOrdenados.size(); idx++){
+            Vertice<T> * nodoElegido = this->vertices[verticesOrdenados.at(idx)];
+            vector<Color> coloresDisponibles; // vamos a agrupar los colores disponibles
+            for (int idx_c = 0; idx_c < coloresOrdenados.size(); idx_c++){
+                // Vamos a recorrer los vertices adyacentes
+                bool existe = false;
+                for (auto & arista: nodoElegido->aristas){ // peso, Vertice<T> *
+                    if (arista->extremo->valorColor == coloresOrdenados.at(idx_c)){
+                        existe = true;
+                        break;
+                    }
+                }
+                if (!existe){
+                    coloresDisponibles.push_back(coloresOrdenados.at(idx_c));
+                }
+            }
+            if (coloresDisponibles.size() > 0){
+                nodoElegido->valorColor = coloresDisponibles.at(0);
+            }else{
+                cout << "NOS FALTAN COLORES";
+                return;
+            }
+        }
+
+        // mostrando los colores pintados
+        for (auto & vertice: this->vertices){
+            cout << "El color del vertice " << vertice.first << " = " << vertice.second->valorColor << endl;
+        }
+    }
+
+    void colorearGrafoWP(){
+        vector<Vertice<T> *> verticesOrdenados;
+        for (auto & vertice: this->vertices){
+            verticesOrdenados.push_back(vertice.second); // Vertice<T> *
+        }
+        sort(verticesOrdenados.begin(), verticesOrdenados.end(), [] (Vertice<T> * a, Vertice<T> * b){
+            return a->aristas.size() > b->aristas.size();
+        });
+        vector<Color> coloresOrdenados = {verde, rojo, amarillo};
+
+        // Coloreando el primer vertice
+        this->vertices[verticesOrdenados.at(0)->valor]->valorColor = coloresOrdenados.at(0);
+        cout << "VERTICE : " << this->vertices[verticesOrdenados.at(0)->valor]->valor << " = " << this->vertices[verticesOrdenados.at(0)->valor]->valorColor;
+        cout << endl << endl;
+        for (int idx = 1; idx < verticesOrdenados.size(); idx++){
+            Vertice<T> * nodoElegido = this->vertices[verticesOrdenados.at(idx)->valor];
+            vector<Color> coloresDisponibles; // vamos a agrupar los colores disponibles
+
+            for (int idx_c = 0; idx_c < coloresOrdenados.size(); idx_c++){
+                // Vamos a recorrer los vertices adyacentes
+                bool existe = false;
+                for (auto & arista: nodoElegido->aristas){ // peso, Vertice<T> *
+                    if (arista->extremo->valorColor == coloresOrdenados.at(idx_c)){
+                        existe = true;
+                        break;
+                    }
+                }
+                if (!existe){
+                    coloresDisponibles.push_back(coloresOrdenados.at(idx_c));
+                }
+            }
+
+            if (coloresDisponibles.size() > 0){
+                nodoElegido->valorColor = coloresDisponibles.at(0);
+            }else{
+                cout << "NOS FALTAN COLORES";
+                return;
+            }
+        }
+
+        // mostrando los colores pintados
+        for (auto & vertice: this->vertices){
+            cout << "El color del vertice " << vertice.first << " = " << vertice.second->valorColor << endl;
+        }
+    }
+
+    void colorearGrafoMMI(){
+        vector<T> verticesOrdenados = {7,5,5,4,3,2,6,1};
+        vector<Color> coloresOrdenados = {verde, rojo, amarillo, morado};
+
+        // Coloreando el primer vertice
+        this->vertices[verticesOrdenados.at(0)]->valorColor = verde;
+        cout << "VERTICE : " << this->vertices[verticesOrdenados.at(0)]->valor << " = " << this->vertices[verticesOrdenados.at(0)]->valorColor;
+        cout << endl << endl;
+        for (int idx = 1; idx < verticesOrdenados.size(); idx++){
+            Vertice<T> * nodoElegido = this->vertices[verticesOrdenados.at(idx)];
+            vector<Color> coloresDisponibles; // vamos a agrupar los colores disponibles
+            for (int idx_c = 0; idx_c < coloresOrdenados.size(); idx_c++){
+                // Vamos a recorrer los vertices adyacentes
+                bool existe = false;
+                for (auto & arista: nodoElegido->aristas){ // peso, Vertice<T> *
+                    if (arista->extremo->valorColor == coloresOrdenados.at(idx_c)){
+                        existe = true;
+                        break;
+                    }
+                }
+                if (!existe){
+                    coloresDisponibles.push_back(coloresOrdenados.at(idx_c));
+                }
+            }
+            if (coloresDisponibles.size() > 0){
+                nodoElegido->valorColor = coloresDisponibles.at(0);
+            }else{
+                cout << "NOS FALTAN COLORES";
+                return;
+            }
+        }
+
+        // mostrando los colores pintados
+        for (auto & vertice: this->vertices){
+            cout << "El color del vertice " << vertice.first << " = " << vertice.second->valorColor << endl;
+        }
+    }
 };
 
 template <typename G, typename V1>

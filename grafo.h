@@ -96,7 +96,7 @@ public:
     friend class Grafo<T>;
 };
 
-typedef char TipoDato;
+typedef string TipoDato;
 // Función usada para KRUSKAL
 bool compararAristas(pair<Vertice<TipoDato> *, Arista<TipoDato> *> & a, pair<Vertice<TipoDato> *, Arista<TipoDato> *> & b){
     return a.second->obtenerPeso() < b.second->obtenerPeso();
@@ -370,17 +370,33 @@ public:
         return this->encontrarVertice(valor)->gradoNegativo;
     }
 
-    void crearVerticesAleatorios(unsigned int cantidadVertices = 10){
+    void crearVerticesAleatorios(unsigned int cantidadNuevosVertices = 10){
         srand(time(NULL));
-        while(this->cantidadVertices < cantidadVertices){
+        while(this->cantidadVertices < cantidadNuevosVertices){
             unsigned int valorArista = 1 + rand() % (999 - 0);
             this->insertarVertice(valorArista);
         }
     }
 
-    void crearGrafoCompleto(unsigned int cantidadVertices = 0){
-        if (cantidadVertices != 0){
-            this->crearVerticesAleatorios(cantidadVertices);
+    void crearGrafoCompleto(){
+        srand(time(NULL));
+        for (auto& vertice: this->vertices){
+            for (auto& verticeExtremo: this->vertices){
+                if (vertice.first != verticeExtremo.first){
+                    if (this->ponderado){
+                        float peso = 1 + rand() % (100);
+                        this->insertarArista(vertice.first, verticeExtremo.first, peso);
+                    }else{
+                        this->insertarArista(vertice.first, verticeExtremo.first);
+                    }
+                }
+            }
+        }
+    }
+
+    void crearGrafoCompleto(unsigned int cantidadNuevosVertices){
+        if (cantidadNuevosVertices >= 1){
+            this->crearVerticesAleatorios(cantidadNuevosVertices);
         }
         srand(time(NULL));
         for (auto& vertice: this->vertices){
@@ -794,7 +810,7 @@ public:
             for (int idx_c = 0; idx_c < coloresOrdenados.size(); idx_c++){
                 // Vamos a recorrer los vertices adyacentes
                 bool existe = false;
-                for (auto & arista: nodoElegido->aristas){ // peso, Vertice<T> *
+                for (Arista<T> * & arista: nodoElegido->aristas){ // peso, Vertice<T> *
                     if (arista->extremo->valorColor == coloresOrdenados.at(idx_c)){
                         existe = true;
                         break;

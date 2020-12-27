@@ -8,23 +8,17 @@
 using namespace std;
 
 int main(){
+    string primerSemestre[] = {"ED2", "CC1", "C1V", "ITP2", "CI", "RN"};
 
-    Grafo<int> g1("coloracion", true);
+    Grafo<string> g1("coloracion", true);
 
-    g1.insertarArista(5, 4);
-    g1.insertarArista(5, 6);
-    g1.insertarArista(5, 2);
-    g1.insertarArista(6, 7);
-    g1.insertarArista(6, 1);
-    g1.insertarArista(6, 4);
-    g1.insertarArista(4, 3);
-    g1.insertarArista(3, 1);
-    g1.insertarArista(3, 2);
-    g1.insertarArista(7, 1);
-    g1.insertarArista(2, 1);
+    for (auto & curso: primerSemestre){
+        g1.insertarVertice(curso);
+    }
 
-    g1.colorearGrafoMMI();
+    g1.crearGrafoCompleto();
 
     g1.crearArchivoDot();
+
     return 1;
 }

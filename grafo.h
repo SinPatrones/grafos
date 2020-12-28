@@ -47,6 +47,7 @@ private:
     unsigned int gradoNegativo;
     vector<Arista<T> *> aristas; // Una lista de ARISTAS - Ver la Clase Arista
     int valorColor = sincolor;  // El color que se le asigne
+    vector<int> coloresPermitidos;
 
 public:
     Vertice(T valor){
@@ -70,6 +71,22 @@ public:
     Vertice<T> * operator ++(){
         this->gradoNegativo++; // Sobrecarga de pre-incremento -> para grado negativo del vertice
         return this;
+    }
+
+    bool esColorPermitido(int colorPrueba){
+        for(auto & color: this->coloresPermitidos){
+            if (colorPrueba == color)
+                return true;
+        }
+        return false;
+    }
+
+    bool pintarVertice(int colorNuevo){
+        if (this->esColorPermitido(colorNuevo)){
+            this->valorColor = colorNuevo;
+            return true;
+        }
+        return false;
     }
 
     // definimos a GRAFO como Amigo de la clase Vertice

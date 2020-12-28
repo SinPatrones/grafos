@@ -216,6 +216,18 @@ public:
         }
     }
 
+    //Asignar horas disponibles al curso
+    bool asignarHorasAlCurso(string nombreCortoCurso, vector<int> horas){
+        if (!this->existeCurso(nombreCortoCurso)) return false;
+        this->cursos[nombreCortoCurso]->asignarHorasPermitidas(horas);
+        return true;
+    }
+    bool asignarUnaHoraAlCurso(string nombreCortoCurso, int hora){
+        if (!this->existeCurso(nombreCortoCurso)) return false;
+        this->cursos[nombreCortoCurso]->asignarUnaHoraPermitida(hora);
+        return true;
+    }
+
     // Asignar Semestre por nombre
     bool asignarSemestreAlCurso(string nombreCortoCurso, string nombreSemestre){
         if (this->cursos.find(nombreCortoCurso) == this->cursos.end())

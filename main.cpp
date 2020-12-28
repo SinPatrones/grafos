@@ -10,16 +10,16 @@ using namespace std;
 
 enum Horas{
     SinHora,
-    PrimeraHora,
-    SegundaHora,
-    TerceraHora,
-    CuartaHora,
-    QuintaHora,
-    SextaHora,
-    SeptimaHora,
-    OctavaHora,
-    NovenaHora,
-    DecimaHora
+    PrimeraHora,    // amarillo
+    SegundaHora,    // verde
+    TerceraHora,    // rojo
+    CuartaHora,     // morado
+    QuintaHora,     // azul
+    SextaHora,      // turquoise3
+    SeptimaHora,    // firebrick
+    OctavaHora,     // goldenrod3
+    NovenaHora,     // aquamarine2
+    DecimaHora      // darkolivegreen3
 };
 
 vector<int> colores = {
@@ -57,9 +57,6 @@ int main(){
     h1.crearCurso("BD2");
     h1.crearCurso("ALN");
 
-    //h1.crearSoloGrupoAlCurso("C1V", "a");
-    //h1.crearSoloGrupoAlCurso("C1V", "b");
-
     h1.asignarSemestreAlCurso("ED2", "PrimerSemestre");
     h1.asignarSemestreAlCurso("C1V", "PrimerSemestre");
     h1.asignarSemestreAlCurso("CC1", "PrimerSemestre");
@@ -93,58 +90,5 @@ int main(){
     h1.mostrarInfoHorario();
     h1.cargarDatos();
 
-
-/*
-    Grafo<string> g1("coloracion", true);
-
-    g1.insertarArista("EDII-a-T", "CCII");
-    g1.insertarArista("EDII-a-T", "C1V-a-T");
-    g1.insertarArista("EDII-a-T", "C1V-a-L");
-    g1.insertarArista("EDII-a-T", "CI");
-    g1.insertarArista("EDII-a-T", "RN");
-    g1.insertarArista("EDII-a-T", "EDII-a-L");
-    //----------------
-    g1.insertarArista("EDII-a-L", "CCII");
-    g1.insertarArista("EDII-a-L", "C1V-a-T");
-    g1.insertarArista("EDII-a-L", "C1V-a-L");
-    g1.insertarArista("EDII-a-L", "CI");
-    g1.insertarArista("EDII-a-L", "RN");
-    g1.insertarArista("EDII-a-L", "EDII-a-T");
-    //----------------
-    g1.insertarArista("CCII","C1V-a-T");
-    g1.insertarArista("CCII","C1V-a-L");
-    g1.insertarArista("CCII","CI");
-    g1.insertarArista("CCII","RN");
-    g1.insertarArista("CCII","C1V-b-L");
-    g1.insertarArista("CCII","C1V-b-T");
-    g1.insertarArista("CCII","EDII-a-L");
-    g1.insertarArista("CCII","EDII-a-T");
-    //-----------------
-    g1.insertarArista("CI","C1V-a-L");
-    g1.insertarArista("CI","C1V-a-T");
-    g1.insertarArista("CI","CCII");
-    g1.insertarArista("CI","EDII-a-T");
-    g1.insertarArista("CI","EDII-a-L");
-    g1.insertarArista("CI","C1V-b-T");
-    g1.insertarArista("CI","C1V-b-L");
-    g1.insertarArista("CI","RN");
-    //------------------
-    g1.insertarArista("RN","CI");
-    g1.insertarArista("RN","C1V-a-L");
-    g1.insertarArista("RN","C1V-a-T");
-    g1.insertarArista("RN","CCII");
-    g1.insertarArista("RN","EDII-a-T");
-    g1.insertarArista("RN","EDII-a-L");
-    g1.insertarArista("RN","C1V-b-T");
-    g1.insertarArista("RN","C1V-b-L");
-    //-------------------
-    g1.insertarArista("C1V-a-T","C1V-a-L");
-    g1.insertarArista("EDII-a-T","EDII-a-L");
-    g1.insertarArista("C1V-b-T","C1V-b-L");
-
-    g1.colorearHorario(colores);
-
-    g1.crearArchivoDot();
-*/
     return 1;
 }

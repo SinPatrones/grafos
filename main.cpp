@@ -45,7 +45,7 @@ int main(){
 
     Horario h1(colores);
 
-    h1.crearCurso("ED2");
+    h1.crearCurso("ED2", "Estructuras Discretas 2");
     h1.crearCurso("CC1");
     h1.crearCurso("C1V");
     h1.crearCurso("ITP2");

@@ -286,6 +286,7 @@ public:
             this->grafo->insertarVertice(curso.first);
             cout << "CURSO: " << curso.first << endl;
         }
+        cout << endl;
 
         // Empezamos a aplicar las reglas para cada curso
         for (auto & cursoPivote: nombresCursos){
@@ -310,7 +311,7 @@ public:
                             this->grafo->insertarArista(cursoPivote.first, curso.first);
                         }
 
-                        // Si no tiene grupo pero el otro curso, entonces se uniran (arista)
+                        // Si no tiene grupo pero el otro curso si lo tiene, entonces se uniran (arista)
                         if (grupoCursoPivote == ' ' && grupoCurso != ' '){
                             this->grafo->insertarArista(cursoPivote.first, curso.first);
                         }
@@ -332,7 +333,6 @@ public:
                         if(nombreCursoPivote == nombreCurso && grupoCursoPivote == grupoCurso){
                             this->grafo->insertarArista(cursoPivote.first, curso.first);
                         }
-
 
                     }
 

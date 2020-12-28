@@ -72,10 +72,20 @@ public:
     }
 
     int encontrarSemestre(string nombreSemestre){
-        for (int idx = 0; idx < this->listaSemestres.size(); idx++){
+        for (size_t idx = 0; idx < this->listaSemestres.size(); idx++){
             if (nombreSemestre == this->listaSemestres[idx])
                 return idx;
         }
+        return -1;
+    }
+
+    int encontrarTipoCurso(string tipoCurso){
+        if (this->tiposDeCursos.size() < 0) return -1;
+        for (size_t idx = 0; idx < this->tiposDeCursos.size(); idx++){
+            if (this->tiposDeCursos[idx] == tipoCurso)
+                return idx;
+        }
+
         return -1;
     }
 

@@ -1,4 +1,3 @@
-#include <QCoreApplication>
 #include "grafo.h"
 #include "horario.h"
 #include <iostream>

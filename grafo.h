@@ -617,25 +617,28 @@ public:
     }
 
     void colorearHorario(vector<int> paleta){
-        vector<Vertice<T> *> verticesOrdenados;
+        vector<Vertice<T> *> verticesOrdenados; // Creamos un vector de vertices el cuales ordenaremos segun su grado
         for (auto & vertice: this->vertices){
-            verticesOrdenados.push_back(vertice.second); // Vertice<T> *
+            verticesOrdenados.push_back(vertice.second); // Vertice<T> * | insertamos todos los vertices del grafo (aún desordenados)
         }
+        // Aplicamos una función para que el vector de vertices se ordenen
         sort(verticesOrdenados.begin(), verticesOrdenados.end(), [] (Vertice<T> * a, Vertice<T> * b){
-            return a->aristas.size() > b->aristas.size();
+            return a->aristas.size() > b->aristas.size();   // en base a la cantidad de aristas que tengan(grado)
         });
 
-        // Coloreando el primer vertice
+        // Coloreando el primer vertice que esta en el vector de VERTICES ORDENADOS
         this->vertices[verticesOrdenados.at(0)->valor]->valorColor = paleta.at(0);
 
+        // Para cada vertices en el vector de vertices ordenados, excepto el primero
         for (int idx = 1; idx < verticesOrdenados.size(); idx++){
-            Vertice<T> * nodoElegido = this->vertices[verticesOrdenados.at(idx)->valor];
-            vector<int> coloresDisponibles; // vamos a agrupar los colores disponibles
+            // Seleccionamos el siguiente vertice a colorear
+            Vertice<T> * verticeElegido = this->vertices[verticesOrdenados.at(idx)->valor];
+            vector<int> coloresDisponibles; // vamos a agrupar los colores disponibles, los que no son adyacentes al vertices escogido
 
             for (int idx_c = 0; idx_c < paleta.size(); idx_c++){
                 // Vamos a recorrer los vertices adyacentes
                 bool existe = false;
-                for (Arista<T> * & arista: nodoElegido->aristas){ // peso, Vertice<T> *
+                for (Arista<T> * & arista: verticeElegido->aristas){ // peso, Vertice<T> *
                     if (arista->extremo->valorColor == paleta.at(idx_c)){
                         existe = true;
                         break;
@@ -647,7 +650,7 @@ public:
             }
 
             if (coloresDisponibles.size() > 0){
-                nodoElegido->valorColor = coloresDisponibles.at(0);
+                verticeElegido->valorColor = coloresDisponibles.at(0);
             }else{
                 cout << "NOS FALTAN COLORES";
                 return;

@@ -13,6 +13,7 @@
 #include <list>
 #include <algorithm>
 
+// LISTA DE COLORES QUE PUEDE USARSE EN EL GRAFO
 enum Color{
     sincolor,
     amarillo, // 1
@@ -41,11 +42,11 @@ class Grafo;
 template <typename T>
 class Vertice{
 private:
-    T valor;
+    T valor;        // El valor de vertices que es de tipo T, el cual se sustituye por un tipo que asignemos (int, string, char, float)
     unsigned int gradoPositivo;
     unsigned int gradoNegativo;
-    vector<Arista<T> *> aristas;
-    int valorColor = sincolor;
+    vector<Arista<T> *> aristas; // Una lista de ARISTAS - Ver la Clase Arista
+    int valorColor = sincolor;  // El color que se le asigne
 
 public:
     Vertice(T valor){
@@ -60,16 +61,19 @@ public:
         return this->valor;
     }
 
-    Vertice<T> * operator ++( int ){
+    // funciones de ayuda
+    Vertice<T> * operator ++( int ){ // Sobrecarga de post-incremento -> para grado positivo del vertice
         this->gradoPositivo++;
         return this;
     }
-
+    // funciones de ayuda
     Vertice<T> * operator ++(){
-        this->gradoNegativo++;
+        this->gradoNegativo++; // Sobrecarga de pre-incremento -> para grado negativo del vertice
         return this;
     }
 
+    // definimos a GRAFO como Amigo de la clase Vertice
+    // para que pueda acceder a métodos y miembros datos privados
     friend class Grafo<T>;
 };
 
@@ -78,50 +82,46 @@ public:
 template <typename T>
 class Arista{
 private:
-    Vertice<T> * extremo;
-    float peso;
+    Vertice<T> * extremo; // Puntero a un VERTICE extremo de la arista
+    float peso; // Peso de la arista, tipo float
 
 public:
+    // Constructor de ARISTA con peso
     Arista(Vertice<T> * vertice, float nuevoPeso){
         this->extremo = vertice;
         this->peso = nuevoPeso;
     }
 
+    // Constructor de ARISTA sin peso
     Arista(Vertice<T> * arista){
         this->extremo = arista;
         this->peso = 0;
     }
 
+    // Obtener dirección de memoria del EXTREMO de la arista
     Vertice<T> * obtenerExtremo(){
         return this->extremo;
     }
 
+    // Obtener el peso de la Arista
     float obtenerPeso(){
         return this->peso;
     }
 
+    // definimos a GRAFO como Amigo de la clase Vertice
+    // para que pueda acceder a métodos y miembros datos privados
     friend class Grafo<T>;
 };
 
-typedef string TipoDato;
-// Función usada para KRUSKAL
-bool compararAristas(pair<Vertice<TipoDato> *, Arista<TipoDato> *> & a, pair<Vertice<TipoDato> *, Arista<TipoDato> *> & b){
-    return a.second->obtenerPeso() < b.second->obtenerPeso();
-}
-
-// Funcion usada para PRIM
-bool compararAristasPrim(pair<pair<pair<TipoDato, TipoDato>, float>, int> & a, pair<pair<pair<TipoDato, TipoDato>, float>, int> & b){
-    if (a.first.second == b.first.second){
-        return a.second < b.second;
-    }
-    return a.first.second < b.first.second;
-}
 // CLASE GRAFO
 template <typename T>
 class Grafo{
 private:
-    //vector<Vertice<T> *> vertices;
+    // Colección de de VERTICES, definida por CLAVE - VALOR
+    // Donde la CLAVE es el nombre/valor del VERTICE
+    // y el VALOR es el puntero(dirección) del VERTICE creado en memoria
     map<T, Vertice<T> *> vertices;
+
     unsigned int cantidadVertices;
     unsigned int cantidadAristas;
     bool dirigido;
@@ -130,7 +130,7 @@ private:
     bool autoinsertar;
     bool ponderado;
     string nombreArchivo;
-    vector<T> valoresVertices;
+    vector<T> valoresVertices; // Lista de solo nombres de VERTICES
 public:
     Grafo(string nombreArchivo = "tmp", bool autoinsertar = false, bool permitirLazos = false, bool dirigido = false, bool ponderado = false, bool multigrafo = false){
         this->cantidadVertices = 0;
@@ -138,37 +138,41 @@ public:
         this->dirigido = dirigido;
         this->multigrafo = multigrafo;
         this->permitirLazos = permitirLazos;
-        this->autoinsertar = autoinsertar;
+        this->autoinsertar = autoinsertar; // Si se inserta una arista con Vertices que no existen, pues se crearan en ese instante
         this->ponderado = ponderado;
         this->nombreArchivo = nombreArchivo;
     }
 
+    // Constructor copia
     Grafo(const Grafo & original){
         (*this) = original;
     }
 
+    // Función para encontrar la dirección de memoria de un vertice, siendo buscado por el valor del vertice
     Vertice<T> * encontrarVertice(T valor){
         auto itEncontrado = this->vertices.find(valor);
         if (itEncontrado == this->vertices.end())
-            return NULL;
-        return itEncontrado->second;
+            return NULL; // si el VERTICE no existe, devuelve NULL;
+        return itEncontrado->second;    // SI es encontrado, devolvera el VALOR(ver linea 122) que es la dirección de memoria del VERTICE
     }
 
+    // Función para encontrar una ARISTA, el cual nos devuelve el VERTICE INCIAL
     Vertice<T> * encontrarArista(T inicio, T final){
-        Vertice<T> * encontradoInicio = this->encontrarVertice(inicio);
+        Vertice<T> * encontradoInicio = this->encontrarVertice(inicio); // Buscamos si existe el VERTICE origen
         if (encontradoInicio){
-            Vertice<T> * encontradoFinal = this->encontrarVertice(final);
+            Vertice<T> * encontradoFinal = this->encontrarVertice(final); // Buscamos si existe el VERTICE final/extremo
             if (encontradoFinal){
-                for (auto it = encontradoInicio->aristas.begin(); it != encontradoInicio->aristas.end(); it++){
+                for (auto it = encontradoInicio->aristas.begin(); it != encontradoInicio->aristas.end(); it++){ // Recorremos las ARISTAS del VERTICE INICIAL
+                    // SI existe la arista con el VERTICE FINAL/EXTREMO, devolvemos el VERTICE INICIAL
                     if ((*it)->extremo->valor == final)
                         return encontradoInicio;
                 }
                 return NULL;
             }else{
-                return NULL;
+                return NULL; // SI NO EXISTE EL VERTICE EXTREMO/FINAL
             }
         }else{
-            return NULL;
+            return NULL; // SI NO EXISTE EL VERTICE ORIGEN
         }
     }
 
@@ -212,14 +216,6 @@ public:
                 salida << "edge [dir=none];\n";
 
             for (auto& vertice: this->vertices){
-                /*
-                 * sincolor,
-                    amarillo, // 1
-                    verde, // 2
-                    rojo,  // 3
-                    morado, // 4
-                    azul, // 5
-                 */
                 string color = ", style=filled, fillcolor=";
                 switch (vertice.second->valorColor) {
                 case amarillo:
@@ -398,75 +394,6 @@ public:
         return this->encontrarVertice(valor)->gradoNegativo;
     }
 
-    void crearVerticesAleatorios(unsigned int cantidadNuevosVertices = 10){
-        srand(time(NULL));
-        while(this->cantidadVertices < cantidadNuevosVertices){
-            unsigned int valorArista = 1 + rand() % (999 - 0);
-            this->insertarVertice(valorArista);
-        }
-    }
-
-    void crearGrafoCompleto(){
-        srand(time(NULL));
-        for (auto& vertice: this->vertices){
-            for (auto& verticeExtremo: this->vertices){
-                if (vertice.first != verticeExtremo.first){
-                    if (this->ponderado){
-                        float peso = 1 + rand() % (100);
-                        this->insertarArista(vertice.first, verticeExtremo.first, peso);
-                    }else{
-                        this->insertarArista(vertice.first, verticeExtremo.first);
-                    }
-                }
-            }
-        }
-    }
-
-    void crearGrafoCompleto(unsigned int cantidadNuevosVertices){
-        if (cantidadNuevosVertices >= 1){
-            this->crearVerticesAleatorios(cantidadNuevosVertices);
-        }
-        srand(time(NULL));
-        for (auto& vertice: this->vertices){
-            for (auto& verticeExtremo: this->vertices){
-                if (vertice.first != verticeExtremo.first){
-                    if (this->ponderado){
-                        float peso = 1 + rand() % (100);
-                        this->insertarArista(vertice.first, verticeExtremo.first, peso);
-                    }else{
-                        this->insertarArista(vertice.first, verticeExtremo.first);
-                    }
-                }
-            }
-        }
-    }
-
-    void crearAristasAleatorias(unsigned int cantidadAristas){
-        cout << "SOLICITADO " << cantidadAristas << " - MAXIMO " << (this->cantidadVertices * (this->cantidadVertices - 1)) / 2 << endl;;
-        if (cantidadAristas >=  ((this->cantidadVertices * (this->cantidadVertices - 1)) / 2)){
-            this->crearGrafoCompleto();
-        }else{
-            if (this->vertices.size() > 0){
-                if (this->ponderado){
-                    srand(time(NULL));
-                    while(this->obtenerCantidadAristas() < cantidadAristas){
-                        int posInicio = rand() % (this->vertices.size());
-                        int posFinal = rand() % (this->vertices.size());
-                        float peso = 1 + rand() % (100);
-                        this->insertarArista(this->valoresVertices[posInicio], this->valoresVertices[posFinal], peso);
-                    }
-                }else{
-                    srand(time(NULL));
-                    while(this->obtenerCantidadAristas() < cantidadAristas){
-                        int posInicio = rand() % (this->vertices.size());
-                        int posFinal = rand() % (this->vertices.size());
-                        this->insertarArista(this->valoresVertices[posInicio], this->valoresVertices[posFinal]);
-                    }
-                }
-            }
-        }
-    }
-
     bool esDirigido(){
         return this->dirigido;
     }
@@ -522,41 +449,6 @@ public:
         }
 
         return *this;
-    }
-
-    bool existeCamino(T valorVerticeInicio, T valorVerticeFinal){
-        if (this->cantidadVertices < 3)
-            return false;
-
-        Vertice<T> * verticeInicio = this->encontrarVertice(valorVerticeInicio);
-        if (!verticeInicio || !this->encontrarVertice(valorVerticeFinal))
-            return false;
-
-        queue<Arista<T> *> aristasPorVisitar;
-        for(auto & arista: verticeInicio->aristas){
-            if (arista->extremo->valor != valorVerticeFinal){
-                aristasPorVisitar.push(arista);
-            }
-        }
-
-        map<T, Vertice<T> *> verticesVisitados;
-        verticesVisitados[valorVerticeInicio] = verticeInicio;
-
-        while(!aristasPorVisitar.empty()){
-            Arista<T> * aristaAux = aristasPorVisitar.front();
-            aristasPorVisitar.pop();
-            verticesVisitados[aristaAux->extremo->valor] = aristaAux->extremo;
-
-            if (aristaAux->extremo->valor == valorVerticeFinal)
-                return true;
-
-            for(auto & aristaPendiente: aristaAux->extremo->aristas){
-                if (verticesVisitados[aristaPendiente->extremo->valor] == NULL){
-                    aristasPorVisitar.push(aristaPendiente);
-                }
-            }
-        }
-        return false;
     }
 
     void vaciarGrafo(){
@@ -646,95 +538,6 @@ public:
         }
         // cerrando archivo
         entrada.close();
-    }
-
-    Grafo<T> generarArbolMinimoPorProfundida(T valorVerticeInicial){
-        Grafo<T> arbolExpansionMinima(this->nombreArchivo + "_adexp", true, false, true);
-        stack<Vertice<T> *> padres;
-
-        Vertice<T> * verticeInicial = this->encontrarVertice(valorVerticeInicial);
-        if (!verticeInicial){
-            return arbolExpansionMinima;
-        }
-        arbolExpansionMinima.insertarVertice(valorVerticeInicial);
-        padres.push(verticeInicial);
-        while(!padres.empty()){
-            verticeInicial = padres.top();
-            padres.pop();
-            list<Arista<T> *> aristas;
-            for(auto & arista: verticeInicial->aristas){
-                if (arbolExpansionMinima.vertices.find(arista->extremo->valor) == arbolExpansionMinima.vertices.end()){
-                    aristas.push_back(arista);
-                }
-            }
-            while(!aristas.empty()){
-                Arista<T> * candidato = aristas.front();
-                aristas.pop_front();
-                if (arbolExpansionMinima.vertices.find(candidato->extremo->valor) == arbolExpansionMinima.vertices.end()){
-                    arbolExpansionMinima.insertarArista(verticeInicial->valor, candidato->extremo->valor);
-                    padres.push(verticeInicial);
-                    verticeInicial = candidato->extremo;
-                    aristas.clear();
-                    for(auto & arista: verticeInicial->aristas){
-                        if (arbolExpansionMinima.vertices.find(arista->extremo->valor) == arbolExpansionMinima.vertices.end()){
-                            aristas.push_back(arista);
-                        }
-                    }
-                }
-            }
-        }
-
-        return arbolExpansionMinima;
-    }
-
-    Grafo<T> generarArbolMinimoPorAnchura(T valorVerticeInicial){
-        Grafo<T> arbolExpansionMinima(this->nombreArchivo + "_adexa", true);
-
-        Vertice<T> * verticeInicial;
-        arbolExpansionMinima.insertarVertice(valorVerticeInicial);
-        arbolExpansionMinima.mostrarListaDeAdyacencia();
-
-        int idxVerticesAgregados = 0;
-
-        while(arbolExpansionMinima.cantidadVertices != this->cantidadVertices){
-            verticeInicial = this->encontrarVertice(arbolExpansionMinima.valoresVertices[idxVerticesAgregados++]);
-            for (auto & arista: verticeInicial->aristas){
-                if (arbolExpansionMinima.vertices.find(arista->extremo->valor) == arbolExpansionMinima.vertices.end()){
-                    arbolExpansionMinima.insertarArista(verticeInicial->valor, arista->extremo->valor);
-                }
-            }
-        }
-        return arbolExpansionMinima;
-    }
-
-    Grafo<T> generarKruskal(){
-        cout << "--- Generando Kruskal ---" << endl;
-        Grafo<T> grafoKruskal("kruskal",true,false,false,true);
-
-        if (this->ponderado){
-            // Agrupamos todas las aristas, para poder ordenarlas
-            vector<pair<Vertice<T> *, Arista<T> *>> listaAristas;
-            for (auto & vertice: this->vertices){
-                for (auto & arista: vertice.second->aristas){
-                    pair<Vertice<T> *, Arista<T> *> verticeAB (vertice.second, arista);
-                    listaAristas.push_back(verticeAB);
-                }
-            }
-            // Ordenando aristas de menor a mayor
-            sort(listaAristas.begin(), listaAristas.end(), compararAristas);
-            // recorremos todas las aristas ordenadas
-            for (auto & candidato: listaAristas){
-                if (!grafoKruskal.existeCamino(candidato.first->valor, candidato.second->extremo->valor)
-                        &&
-                        !grafoKruskal.encontrarArista(candidato.first->valor, candidato.second->extremo->valor)){
-                    grafoKruskal.insertarArista(candidato.first->valor, candidato.second->extremo->valor, candidato.second->peso);
-                }
-                // grafoKruskal.cantidadAristas == (this->cantidadVertices - 1)
-                if (grafoKruskal.cantidadVertices == this->cantidadVertices) // termina cuando tienen misma cantidad de vertices
-                    break;
-            }
-        }
-        return grafoKruskal;
     }
 
     Grafo<T> generarPrim(T valorVerticeInical = NULL){
@@ -945,22 +748,6 @@ public:
         }
     }
 };
-
-template <typename G, typename V1>
-void insertarCaminoEn(G & grafo, const V1 & unico){
-    grafo.insertarVertice(unico);
-}
-
-template <typename G, typename V1, typename V2>
-void insertarCaminoEn(G & grafo, const V1 & primero, const V2 & segundo){
-    grafo.insertarArista(primero, segundo);
-}
-
-template <typename G, typename V1, typename V2, typename V3, typename ... V>
-void insertarCaminoEn(G & grafo, const V1 & primero, const V2 & segundo, const V3 & tercero, const V &... restoValores){
-    grafo.insertarArista(primero, segundo);
-    insertarCaminoEn(grafo, segundo, tercero, restoValores...);
-}
 
 
 #endif // GRAFO_H

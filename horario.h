@@ -17,10 +17,11 @@ private:
 
     unsigned int cantidadCursos;
 
-    Grafo<string> grafo;
+    Grafo<string> * grafo;
 
 public:
     Horario(){
+        this->grafo = nullptr;
         this->cantidadCursos = 0;
     }
 
@@ -46,6 +47,10 @@ public:
         this->cursos[nombreCorto] = new Curso(nombreCorto, nombreLargo, idSemestre);
         this->cantidadCursos++;
         return true;
+    }
+
+    bool existeCurso(string nombreCortoCurso){
+        return !(this->cursos.find(nombreCortoCurso) == this->cursos.end());
     }
 
     void mostrarInfoHorario(){
@@ -143,12 +148,40 @@ public:
         return idTipoCurso;
     }
 
-    // Asignar profesor por nombre
+    // Asignar profesor por nombre ----- DE MANERA GENERAL PARA EL CURSO
     bool asignarProfesorAlCurso(string nombreCortoCurso, string nombreProfesor){
         if (this->cursos.find(nombreCortoCurso) == this->cursos.end())
             return false;
         this->cursos[nombreCortoCurso]->asignarProfesor(this->crearProfesor(nombreProfesor));
         return true;
+    }
+
+    bool asignarProfesorAlGrupoCurso(string nombreCortoCurso, string nombreGrupo, string nombreProfesor){
+        if (!this->existeCurso(nombreCortoCurso)) return false;
+        if (this->cursos[nombreCortoCurso]->asignarProfesorGrupo(this->crearProfesor(nombreProfesor), nombreGrupo) >= 0){
+            this->crearGrupo(nombreGrupo);
+            return true;
+        }
+        return false;
+    }
+
+    bool asignarProfesorAlTipoCurso(string nombreCortoCurso, string nombreTipo, string nombreProfesor){
+        if (!this->existeCurso(nombreCortoCurso)) return false;
+        if (this->cursos[nombreCortoCurso]->asignarProfesorTipo(this->crearProfesor(nombreProfesor), nombreTipo) >= 0){
+            this->crearTipoCurso(nombreTipo);
+            return true;
+        }
+        return false;
+    }
+
+    bool asignarProfesorAlTipoGrupoCurso(string nombreCortoCurso, string nombreTipo, string nombreGrupo, string nombreProfesor){
+        if (!this->existeCurso(nombreCortoCurso)) return false;
+        if (this->cursos[nombreCortoCurso]->asignarProfesorTipoGrupo(this->crearProfesor(nombreProfesor), nombreTipo, nombreGrupo)){
+            this->crearGrupo(nombreGrupo);
+            this->crearTipoCurso(nombreTipo);
+            return true;
+        }
+        return false;
     }
 
     // Asignar Semestre por nombre
@@ -159,7 +192,7 @@ public:
         return true;
     }
 
-    // Asignar profesor por ID
+    // Asignar profesor por ID ----- DE MANERA GENERAL PARA EL CURSO
     bool asignarProfesorAlCurso(string nombreCortoCurso, int idProfesor){
         if (this->cursos.find(nombreCortoCurso) == this->cursos.end()) // Si el curso no existe, devuelve false
             return false;
@@ -196,6 +229,7 @@ public:
             return false;
         this->cursos[nombreCortoCurso]->crearGrupoTipoCurso(tipo, grupo);
         this->crearGrupo(grupo);
+        this->crearTipoCurso(tipo);
         return true;
     }
 

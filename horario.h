@@ -1,6 +1,7 @@
 #ifndef HORARIO_H
 #define HORARIO_H
 #include "grafo.h"
+#include "curso.h"
 
 class Horario{
 private:
@@ -99,7 +100,7 @@ public:
     }
 
     int encontrarProfesor(string nombreProfesor){
-        for (int idx = 0; idx < this->listaProfesores.size(); idx++){
+        for (size_t idx = 0; idx < this->listaProfesores.size(); idx++){
             if (nombreProfesor == this->listaProfesores[idx])
                 return idx;
         }
@@ -168,9 +169,6 @@ public:
         return true;
     }
 
-    bool crearTipoCurso(string cursoMaster, string tipoCurso){
-
-    }
 
 };
 

@@ -302,10 +302,12 @@ public:
         }
     }
 
+    // Función para insertar un VERTICE de tipo T(int, string, char) y nos devolvera la dirección de memoria de dicho VERTICE
     Vertice<T> * insertarVertice(T valor){
-        if (this->encontrarVertice(valor)){
-            return this->encontrarVertice(valor);
+        if (this->encontrarVertice(valor)){ // En el caso de que ya exista el VERTICE
+            return this->encontrarVertice(valor); // devolvera su dirección de memoria
         }
+        // SI NO EXISTE, crearemos el vertice y lo insertaremos en el grafo
         Vertice<T> * nuevoVertice = new Vertice<T>(valor);
         this->vertices[valor] = nuevoVertice;
         this->cantidadVertices++;
@@ -314,18 +316,19 @@ public:
         return nuevoVertice;
     }
 
+    // FUNCIÓN PARA INSERTAR UNA ARISTA, PIDIENDO EL VERTICE ORIGEN Y VERTICE DESTINO
     bool insertarArista(T inicio, T fin, float peso = 0){
-        if (!this->permitirLazos && (inicio == fin)){
+        if (!this->permitirLazos && (inicio == fin)){ // Control para ver si se pueden aceptar LAZOS (arista con mismo VERTICES origen y final)
             return false;
         }
 
-        Vertice<T> * inicioEncontrado = this->encontrarVertice(inicio);
-        Vertice<T> * finEncontrado = this->encontrarVertice(fin);
+        Vertice<T> * inicioEncontrado = this->encontrarVertice(inicio); // Buscamos el vertice origen
+        Vertice<T> * finEncontrado = this->encontrarVertice(fin);   // Buscamos el vertice destino/final/extremo
 
-        if (inicioEncontrado){
-            if (finEncontrado){
-                if (this->encontrarArista(inicio, fin)){
-                    if (this->multigrafo){
+        if (inicioEncontrado){      // |    VEMOS SI EXISTEN LOS VERTICES
+            if (finEncontrado){     // |
+                if (this->encontrarArista(inicio, fin)){ // Comprobamos si ya existe una arista entre estos dos vertices
+                    if (this->multigrafo){ // En el caso de ser un MULTIGRAFO, volvemos a insertar una arista más
                         inicioEncontrado->aristas.push_back(new Arista<T>(finEncontrado, peso));
                         (*inicioEncontrado)++;
                         ++(*finEncontrado);
@@ -337,12 +340,14 @@ public:
                         this->cantidadAristas++;
                         return true;
                     }
+                    // si no es multigrafo, devolvemos FALSE, porque no insertamos arista
                     return false;
                 }else{ // Si la arista a insertar no existe
+                    // Insertamos la nueva arista en el nodo origen
                     inicioEncontrado->aristas.push_back(new Arista<T>(finEncontrado, peso));
                     (*inicioEncontrado)++;
                     ++(*finEncontrado);
-                    if (!this->dirigido){
+                    if (!this->dirigido){ // y si no es dirigido, tenemos que insertar la arista en el sentido opuesto
                         finEncontrado->aristas.push_back(new Arista<T>(inicioEncontrado, peso));
                         (*finEncontrado)++;
                         ++(*inicioEncontrado);
@@ -367,7 +372,7 @@ public:
                 }
                 return false;
             }
-        }else{
+        }else{ // En el caso que no exista en nodo inicial/origen
             if (this->autoinsertar){
                 Vertice<T> * nuevoInicio = this->insertarVertice(inicio);
                 Vertice<T> * nuevoFin = this->insertarVertice(fin);
@@ -415,21 +420,7 @@ public:
         return p;
     }
 
-    friend ostream& operator << (ostream &o,const Grafo<T> &grafo){
-        o << endl;
-        o << "-- MATRIZ DE ADYACENCIA DE " << grafo.nombreArchivo << endl;
-        for (auto& vertice: grafo.vertices){
-            o << vertice.first << " = ";
-            for (auto& aristas: vertice.second->obtenerAristas()){
-                o << aristas->obtenerExtremo()->obtenerValor() << ", ";
-            }
-            o << endl;
-        }
-        o << endl;
-
-        return o;
-    }
-
+    // Sobrecarga del operador de asignación
     Grafo<T> & operator = (const Grafo & otro){
         this->dirigido = otro.dirigido;
         this->multigrafo = otro.multigrafo;
@@ -540,48 +531,7 @@ public:
         entrada.close();
     }
 
-    Grafo<T> generarPrim(T valorVerticeInical = NULL){
-        cout << "--- Generando PRIM ---" << endl;
-        Grafo<T> grafoPrim("prim", true, false, this->dirigido, true);
-        // El grafo tiene que ser ponderado
-        if(this->ponderado){
-            Vertice<T> * verticeInical;
-            if (valorVerticeInical != NULL){
-                verticeInical = this->encontrarVertice(valorVerticeInical);
-            }else{
-                verticeInical = this->vertices[(*this->vertices.begin()).first];
-            }
-
-            grafoPrim.insertarVertice(verticeInical->valor);
-
-            while(grafoPrim.cantidadAristas != (this->cantidadVertices - 1)){
-                // [<<<vInicio, vFinal>,PESO>, ORDEN>, ...]
-                vector<pair<pair<pair<T,T>, float>, int>> aristas;
-                int orden = 1;
-                for(T & valorVertice: grafoPrim.valoresVertices){
-                    Vertice<T> * vAux = this->encontrarVertice(valorVertice);
-                    for (auto & arista: vAux->aristas){
-                        if (grafoPrim.encontrarVertice(arista->extremo->valor) == NULL){
-                            pair<T,T> paresVertices(valorVertice, arista->extremo->valor);
-                            pair<pair<T,T>, float> paresYpesos(paresVertices, arista->peso);
-                            pair<pair<pair<T,T>, float>, int> aristaPrim(paresYpesos, orden);
-
-                            aristas.push_back(aristaPrim);
-                        }
-                    }
-                    orden++;
-                }
-
-                sort(aristas.begin(), aristas.end(), compararAristasPrim);
-
-                auto aristaElegida = aristas.at(0);
-                grafoPrim.insertarArista(aristaElegida.first.first.first, aristaElegida.first.first.second, aristaElegida.first.second);
-            }
-
-        }
-        return grafoPrim;
-    }
-
+    // IMPLEMENTACIÓN DEL ALGORIMO VORAZ
     void colorearGrafoVoraz(){
         vector<T> verticesOrdenados = {1,2,3,4,5,6,7};
         vector<Color> coloresOrdenados = {verde, rojo, amarillo};

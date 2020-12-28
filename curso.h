@@ -12,6 +12,7 @@ private:
     string nombreCurso;
     string nombreLargoCurso;
     int semestre;
+    int profesor;
     // Se agrupan por tipo, y se enumera los grupos
     map<string, vector<string>> tiposDeCurso;
     // Se agrupan por grupos y se enumeran los tipos
@@ -20,25 +21,42 @@ private:
 public:
     Curso(string nombreCorto){
         this->nombreCurso = nombreCorto;
+        this->nombreLargoCurso = "";
+        this->semestre = -1;
+        this->profesor = -1;
     }
     Curso(string nombreCorto, string nombreLargo){
         this->nombreCurso = nombreCorto;
         this->nombreLargoCurso = nombreLargo;
+        this->semestre = -1;
+        this->profesor = -1;
     }
     Curso(string nombreCorto, int idSemestre){
         this->nombreCurso = nombreCorto;
         this->semestre = idSemestre;
+        this->nombreLargoCurso = "";
+        this->profesor = -1;
     }
     Curso(string nombreCorto, string nombreLargo, int idSemestre){
         this->nombreCurso = nombreCorto;
         this->nombreLargoCurso = nombreLargo;
         this->semestre = idSemestre;
+        this->profesor = -1;
+    }
+
+    int asignarProfesor(int idProfesor){
+        return this->profesor = idProfesor;
+    }
+
+    int asignarSemestre(int idSemestre){
+        return this->semestre = idSemestre;
     }
 
     void mostrarValores(){
         cout << endl;
         cout << "NOMBRE CORTO: " << this->nombreCurso << endl;
         cout << "NOMBRE LARGO: " << this->nombreLargoCurso << endl;
+        cout << "ID PROFESOR: " << this->profesor << endl;
         cout << "NUMERO DE SEMESTRE: " << this->semestre << endl;
         cout << "TIPOS CREADOS: " << endl;
         for(auto & tipo: this->tiposDeCurso){
@@ -87,11 +105,12 @@ public:
         return -1;
     }
 
+    // Función para agregar un grupo al tipo de curso
     bool crearGrupoTipoCurso(string tipoSeleccionado, string nombreGrupo){
         if (this->encontrarGrupoEnTipo(tipoSeleccionado, nombreGrupo) < 0){
             this->tiposDeCurso[tipoSeleccionado].push_back(nombreGrupo);
         }
-        if (this->gruposDeCurso.find(nombreGrupo) == this->gruposDeCurso.end()){
+        if (this->encontrarTipoEnGrupo(nombreGrupo, tipoSeleccionado) < 0){
             this->gruposDeCurso[nombreGrupo].push_back(tipoSeleccionado);
         }
         return true;
@@ -108,11 +127,12 @@ public:
         return -1;
     }
 
+    // Función para crear un tipo de curso a un grupo
     bool crearTipoGrupoCurso(string grupoSeleccionado, string nombreTipo){
         if (this->encontrarTipoEnGrupo(grupoSeleccionado, nombreTipo) < 0){
             this->gruposDeCurso[grupoSeleccionado].push_back(nombreTipo);
         }
-        if (this->tiposDeCurso.find(nombreTipo) == this->gruposDeCurso.end()){
+        if (this->encontrarGrupoEnTipo(nombreTipo, grupoSeleccionado) < 0){
             this->tiposDeCurso[nombreTipo].push_back(grupoSeleccionado);
         }
         return true;

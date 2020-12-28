@@ -50,6 +50,11 @@ int main(){
 
     c1.crearGrupoTipoCurso("TE", "a");
     c1.crearGrupoTipoCurso("TE", "b");
+    c1.crearTipoGrupoCurso("c", "TE");
+    c1.crearGrupoTipoCurso("LA", "a");
+    c1.crearGrupoTipoCurso("PR", "a");
+
+    c1.asignarProfesor(34);
 
     c1.mostrarValores();
 /*

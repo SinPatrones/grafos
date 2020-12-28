@@ -5,170 +5,114 @@
 
 class Horario{
 private:
-    vector<string> grupos;
-    vector<string> tiposDeCursos;
-    // <NOMBRE CURSO PRINCIPAL , GRUPOS DE CURSO>
-    map<string, vector<string>> cursos; // lista de los cursos y sus grupos que tiene
-    map<string, int> semestreDelCurso; // muesta el id del semestre al que pertenece el curso
-    vector<string> listaSemestres; // lista de nombres de Semestres
-    vector<string> listaProfesores; // Lista de profesores, y su indice será su ID
-    map<int, vector<string>> profesoresDicta;
+    vector<string> grupos; // Lista para guardar los grupos que se hayan creado en todo el horario (ejm: a, b, c)
+    vector<string> tiposDeCursos;   // Lista de los TIPOS de cursos que se hayan creado en el horario (ejm: LAboratorio, TEoria, PRacticas)
+    vector<string> semestres;
+    vector<string> profesores;
 
+    // Lista de cursos ordenados a manera de colección
+    // en el cual la CLAVE es el nombre corto del curso
+    // y el VALOR es el puntero(dirección) del curso creado en memoria
+    map<string, Curso *> cursos;
+
+    unsigned int cantidadCursos;
 
     Grafo<string> grafo;
 
 public:
     Horario(){
-        this->grupos = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"};
-        this->tiposDeCursos = {};
+        this->cantidadCursos = 0;
     }
 
-    // mostrar cursos registrados y sus grupos
-    void mostrarCursos(){
-        cout << "-------- MOSTRANDO CURSOS REGISTRADOS ------------" << endl;
-        for (auto & curso: this->cursos){
-            string semestre = "";
-            int idSemestre = this->semestreDelCurso[curso.first];
-            if (idSemestre < 0){
-                semestre = "(Sin Semestre)";
-            }else{
-                semestre = "( " + this->listaSemestres[idSemestre] + " )";
-            }
-            cout << curso.first << " " << semestre << " = ";
-            for (auto & grupo: curso.second){
-                cout << grupo << ", ";
-            }
-            cout << endl;
-        }
-        cout << "---------------------------------------------------" << endl;
-    }
-
-    string extrarNombreCurso(string nombreCurso){
-        size_t pos = nombreCurso.find(":");
-        if (pos == string::npos)
-            return nombreCurso; // si no tiene marca de tener grupo da el mismo nombre
-
-        string soloNombre = "";
-        for (size_t idx = 0; idx < pos; idx++){
-            soloNombre += nombreCurso[idx];
-        }
-
-        return soloNombre;
-    }
-
-    char extraerGrupoCurso(string nombreCurso){
-        size_t pos = nombreCurso.find(":");
-        if (pos == string::npos)
-            return ' ';
-
-        return nombreCurso[pos + 1];
-    }
-
-    string extraerTipoCurso(string nombreCurso){
-        size_t pos = nombreCurso.find("-");
-        if (pos == string::npos)
-            return "  ";
-
-        return nombreCurso.substr(pos + 1, 2);
-    }
-
-    int encontrarSemestre(string nombreSemestre){
-        for (size_t idx = 0; idx < this->listaSemestres.size(); idx++){
-            if (nombreSemestre == this->listaSemestres[idx])
-                return idx;
-        }
-        return -1;
-    }
-
-    int encontrarTipoCurso(string tipoCurso){
-        if (this->tiposDeCursos.size() < 0) return -1;
-        for (size_t idx = 0; idx < this->tiposDeCursos.size(); idx++){
-            if (this->tiposDeCursos[idx] == tipoCurso)
-                return idx;
-        }
-
-        return -1;
-    }
-
-    int crearSemestre(string nombreSemestre){
-        int id = this->encontrarSemestre(nombreSemestre);
-        if (id < 0){
-            this->listaSemestres.push_back(nombreSemestre);
-            return this->listaSemestres.size() - 1;
-        }
-        return id;
-    }
-
-    int encontrarProfesor(string nombreProfesor){
-        for (size_t idx = 0; idx < this->listaProfesores.size(); idx++){
-            if (nombreProfesor == this->listaProfesores[idx])
-                return idx;
-        }
-        return -1;
-    }
-
-    int crearProfesor(string nombreProfesor){
-        int id = this->encontrarProfesor(nombreProfesor);
-        if (id < 0){
-            this->listaProfesores.push_back(nombreProfesor);
-            return this->listaProfesores.size() - 1;
-        }
-        return id;
-    }
-
-    // función que solo insertara un curso SI es que no existe
-    // sin asignarle un semestre
-    bool crearCurso(string nombreCurso){
-        vector<string> grupo;
-        if (this->cursos.find(nombreCurso) == this->cursos.end()){
-            this->cursos[nombreCurso] = grupo;
-            this->semestreDelCurso[nombreCurso] = -1;
-            return true;
-        }
-        return false;
-    }
-
-    // crear curso con base al nombre del semestre
-    bool crearCurso(string nombreCurso, string nombreSemestre){
-        int idSemestre = this->encontrarSemestre(nombreSemestre);
-        if (idSemestre < 0)
-            return false;   // cuando no exista el nombre del semestre no crea el curso
-
-        vector<string> grupo;
-        if (this->cursos.find(nombreCurso) == this->cursos.end()){
-            this->cursos[nombreCurso] = grupo;
-            this->semestreDelCurso[nombreCurso] = idSemestre;
-            return true;
-        }
-        return false;
-    }
-
-    // crear curso con base al ID del semestre
-    bool crearCurso(string nombreCurso, int idSemestre){
-        if (idSemestre < 0 || idSemestre > this->listaSemestres.size())
-            return false;
-
-        vector<string> grupo;
-        if (this->cursos.find(nombreCurso) == this->cursos.end()){
-            this->cursos[nombreCurso] = grupo;
-            this->semestreDelCurso[nombreCurso] = idSemestre;
-            return true;
-        }
-        return false;
-    }
-
-    // insertará un grupo
-    bool crearGrupoEnCurso(string cursoMaster){
-        int cantidadGrupos = this->cursos[cursoMaster].size();
-
-        // dara false si la cantidad de grupo excede el limite establecido
-        if (cantidadGrupos > this->grupos.size()) return false;
-
-        // si no hay excedente, continuamos
-        this->cursos[cursoMaster].push_back(cursoMaster + ":" + this->grupos[cantidadGrupos]);
+    bool crearCurso(string nombreCorto){
+        this->cursos[nombreCorto] = new Curso(nombreCorto);
+        this->cantidadCursos++;
         return true;
     }
 
+    bool crearCurso(string nombreCorto, string nombreLargo){
+        this->cursos[nombreCorto] = new Curso(nombreCorto, nombreLargo);
+        this->cantidadCursos++;
+        return true;
+    }
+
+    bool crearCurso(string nombreCorto, int idSemestre){
+        this->cursos[nombreCorto] = new Curso(nombreCorto, idSemestre);
+        this->cantidadCursos++;
+        return true;
+    }
+
+    bool crearCurso(string nombreCorto, string nombreLargo, int idSemestre){
+        this->cursos[nombreCorto] = new Curso(nombreCorto, nombreLargo, idSemestre);
+        this->cantidadCursos++;
+        return true;
+    }
+
+    size_t encontrarSemestre(string nombreSemestre){
+        for (size_t idx = 0; idx < this->semestres.size(); idx++){
+            if (this->semestres[idx] == nombreSemestre)
+                return idx;
+        }
+        return -1;
+    }
+
+    size_t encontrarProfesor(string nombreProfesor){
+        for (size_t idx = 0; idx < this->profesores.size(); idx++){
+            if (this->profesores[idx] == nombreProfesor)
+                return idx;
+        }
+        return -1;
+    }
+
+    size_t crearProfesor(string nombreProfesor){
+        size_t idProfesor = this->encontrarProfesor(nombreProfesor);
+        if (idProfesor < 0){
+            this->profesores.push_back(nombreProfesor);
+            return 0;
+        }
+        return idProfesor;
+    }
+
+    size_t crearSemestre(string nombreSemestre){
+        size_t idSemestre = this->encontrarSemestre(nombreSemestre);
+        if (idSemestre < 0){
+            this->semestres.push_back(nombreSemestre);
+            return 0;
+        }
+        return idSemestre;
+    }
+
+    // Asignar profesor por nombre
+    bool asignarProfesorAlCurso(string nombreCortoCurso, string nombreProfesor){
+        if (this->cursos.find(nombreCortoCurso) == this->cursos.end())
+            return false;
+        this->cursos[nombreCortoCurso]->asignarProfesor(this->crearProfesor(nombreProfesor));
+        return true;
+    }
+
+    // Asignar Semestre por nombre
+    bool asignarSemestreAlCurso(string nombreCortoCurso, string nombreSemestre){
+        if (this->cursos.find(nombreCortoCurso) == this->cursos.end())
+            return false;
+        this->cursos[nombreCortoCurso]->asignarSemestre(this->crearSemestre(nombreSemestre));
+        return true;
+    }
+
+    // Asignar profesor por ID
+    bool asignarProfesorAlCurso(string nombreCortoCurso, int idProfesor){
+        if (this->cursos.find(nombreCortoCurso) == this->cursos.end()) // Si el curso no existe, devuelve false
+            return false;
+        this->cursos[nombreCortoCurso]->asignarProfesor(idProfesor);
+        return true;
+    }
+
+    // Asignar semestre por ID
+    bool asignarSemestreAlCurso(string nombreCortoCurso, int idSemestre){
+        if (this->cursos.find(nombreCortoCurso) == this->cursos.end()) // Si el curso no existe, devuelve false
+            return false;
+        this->cursos[nombreCortoCurso]->asignarSemestre(idSemestre);
+        return true;
+    }
 
 };
 

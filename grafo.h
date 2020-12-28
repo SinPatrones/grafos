@@ -121,6 +121,18 @@ private:
     // Donde la CLAVE es el nombre/valor del VERTICE
     // y el VALOR es el puntero(dirección) del VERTICE creado en memoria
     map<T, Vertice<T> *> vertices;
+    /*
+     vertice["ED2"] --> Valor que se haya guardado: El puntero de Vertice<T> (#523546345)
+    [
+            STRING
+            "ED2"
+            FIRST    SECOND
+        pair< T  , Vertice<T> *> vertice,
+        pair< T  , Vertice<T> *> vertice,
+        pair< T  , Vertice<T> *> vertice,
+        pair< T  , Vertice<T> *> vertice,
+    ]
+    */
 
     unsigned int cantidadVertices;
     unsigned int cantidadAristas;
@@ -575,6 +587,7 @@ public:
         for (auto & vertice: this->vertices){
             verticesOrdenados.push_back(vertice.second); // Vertice<T> *
         }
+        // Función para ordenar los vetices en base a su grado          | Función Lambda / Función Anonima
         sort(verticesOrdenados.begin(), verticesOrdenados.end(), [] (Vertice<T> * a, Vertice<T> * b){
             return a->aristas.size() > b->aristas.size();
         });
@@ -621,7 +634,7 @@ public:
         for (auto & vertice: this->vertices){
             verticesOrdenados.push_back(vertice.second); // Vertice<T> * | insertamos todos los vertices del grafo (aún desordenados)
         }
-        // Aplicamos una función para que el vector de vertices se ordenen
+        // Función para ordenar los vetices en base a su grado          | Función Lambda / Función Anonima
         sort(verticesOrdenados.begin(), verticesOrdenados.end(), [] (Vertice<T> * a, Vertice<T> * b){
             return a->aristas.size() > b->aristas.size();   // en base a la cantidad de aristas que tengan(grado)
         });

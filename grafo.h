@@ -20,6 +20,13 @@ enum Color{
     rojo,  // 3
     morado, // 4
     azul, // 5
+    turquoise3, //6
+    firebrick, // 7
+    goldenrod3, // 8
+    aquamarine2, // 9
+    darkolivegreen3, // 10
+    mistyrose2, // 11
+    chocolate, // 12
 };
 
 using namespace std;
@@ -38,7 +45,7 @@ private:
     unsigned int gradoPositivo;
     unsigned int gradoNegativo;
     vector<Arista<T> *> aristas;
-    Color valorColor = sincolor;
+    int valorColor = sincolor;
 
 public:
     Vertice(T valor){
@@ -229,6 +236,27 @@ public:
                     break;
                 case azul:
                     color += "blue";
+                    break;
+                case turquoise3:
+                    color += "turquoise3";
+                    break;
+                case firebrick:
+                    color += "firebrick";
+                    break;
+                case goldenrod3:
+                    color += "goldenrod3";
+                    break;
+                case aquamarine2:
+                    color += "aquamarine2";
+                    break;
+                case darkolivegreen3:
+                    color += "darkolivegreen3";
+                    break;
+                case mistyrose2:
+                    color += "mistyrose2";
+                    break;
+                case chocolate:
+                    color += "chocolate";
                     break;
                 default:
                     color = "";
@@ -818,6 +846,50 @@ public:
                 }
                 if (!existe){
                     coloresDisponibles.push_back(coloresOrdenados.at(idx_c));
+                }
+            }
+
+            if (coloresDisponibles.size() > 0){
+                nodoElegido->valorColor = coloresDisponibles.at(0);
+            }else{
+                cout << "NOS FALTAN COLORES";
+                return;
+            }
+        }
+
+        // mostrando los colores pintados
+        for (auto & vertice: this->vertices){
+            cout << "El color del vertice " << vertice.first << " = " << vertice.second->valorColor << endl;
+        }
+    }
+
+    void colorearHorario(vector<int> paleta){
+        vector<Vertice<T> *> verticesOrdenados;
+        for (auto & vertice: this->vertices){
+            verticesOrdenados.push_back(vertice.second); // Vertice<T> *
+        }
+        sort(verticesOrdenados.begin(), verticesOrdenados.end(), [] (Vertice<T> * a, Vertice<T> * b){
+            return a->aristas.size() > b->aristas.size();
+        });
+
+        // Coloreando el primer vertice
+        this->vertices[verticesOrdenados.at(0)->valor]->valorColor = paleta.at(0);
+
+        for (int idx = 1; idx < verticesOrdenados.size(); idx++){
+            Vertice<T> * nodoElegido = this->vertices[verticesOrdenados.at(idx)->valor];
+            vector<int> coloresDisponibles; // vamos a agrupar los colores disponibles
+
+            for (int idx_c = 0; idx_c < paleta.size(); idx_c++){
+                // Vamos a recorrer los vertices adyacentes
+                bool existe = false;
+                for (Arista<T> * & arista: nodoElegido->aristas){ // peso, Vertice<T> *
+                    if (arista->extremo->valorColor == paleta.at(idx_c)){
+                        existe = true;
+                        break;
+                    }
+                }
+                if (!existe){
+                    coloresDisponibles.push_back(paleta.at(idx_c));
                 }
             }
 

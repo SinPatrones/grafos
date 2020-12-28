@@ -19,7 +19,8 @@ enum Horas{
     SeptimaHora,    // firebrick
     OctavaHora,     // goldenrod3
     NovenaHora,     // aquamarine2
-    DecimaHora      // darkolivegreen3
+    DecimaHora,      // darkolivegreen3
+    DecimoPrimeraHora
 };
 
 vector<int> colores = {
@@ -32,7 +33,8 @@ vector<int> colores = {
     SeptimaHora,
     OctavaHora,
     NovenaHora,
-    DecimaHora
+    DecimaHora,
+    DecimoPrimeraHora
 };
 
 int main(){
@@ -56,6 +58,18 @@ int main(){
     h1.crearCurso("TC");
     h1.crearCurso("BD2");
     h1.crearCurso("ALN");
+
+    h1.asignarHorasAlCurso("ED2", {PrimeraHora, SegundaHora, TerceraHora, CuartaHora, QuintaHora, SextaHora, SeptimaHora, OctavaHora});
+    h1.asignarHorasAlCurso("CC1", {PrimeraHora, SegundaHora, TerceraHora, CuartaHora, QuintaHora, SextaHora, SeptimaHora, OctavaHora});
+    h1.asignarHorasAlCurso("C1V", {PrimeraHora, SegundaHora, TerceraHora, CuartaHora, QuintaHora, SextaHora, SeptimaHora, OctavaHora});
+    h1.asignarHorasAlCurso("ITP2", {PrimeraHora, SegundaHora, TerceraHora, CuartaHora, QuintaHora, SextaHora, SeptimaHora, OctavaHora});
+    h1.asignarHorasAlCurso("RN", {PrimeraHora, SegundaHora, TerceraHora, CuartaHora, QuintaHora, SextaHora, SeptimaHora, OctavaHora});
+    h1.asignarHorasAlCurso("CI", {PrimeraHora, SegundaHora, TerceraHora, CuartaHora, QuintaHora, SextaHora, SeptimaHora, OctavaHora});
+
+    h1.asignarHorasAlCurso("AED", {CuartaHora, QuintaHora, SextaHora, SeptimaHora, OctavaHora, NovenaHora, DecimaHora, DecimoPrimeraHora});
+    h1.asignarHorasAlCurso("TC", {CuartaHora, QuintaHora, SextaHora, SeptimaHora, OctavaHora, NovenaHora, DecimaHora, DecimoPrimeraHora});
+    h1.asignarHorasAlCurso("BD2", {CuartaHora, QuintaHora, SextaHora, SeptimaHora, OctavaHora, NovenaHora, DecimaHora, DecimoPrimeraHora});
+    h1.asignarHorasAlCurso("ALN", {CuartaHora, QuintaHora, SextaHora, SeptimaHora, OctavaHora, NovenaHora, DecimaHora, DecimoPrimeraHora});
 
     h1.asignarSemestreAlCurso("ED2", "PrimerSemestre");
     h1.asignarSemestreAlCurso("C1V", "PrimerSemestre");

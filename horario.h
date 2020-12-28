@@ -344,6 +344,7 @@ public:
                 }
             }
 
+            this->grafo->asignarColoresPermitidos(cursoPivote.first, cursoPivote.second->horasPermitidas);
         }
 
         this->grafo->colorearHorario(this->paleta);

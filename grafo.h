@@ -13,6 +13,7 @@
 #include <list>
 #include <algorithm>
 
+
 // LISTA DE COLORES QUE PUEDE USARSE EN EL GRAFO
 enum Color{
     sincolor,
@@ -604,6 +605,12 @@ public:
         }
     }
 
+    bool asignarColoresPermitidos(T vertice, vector<int> colores){
+        if (this->vertices.find(vertice) == this->vertices.end()) return false;
+        this->vertices[vertice]->asignarColoresPermitidos(colores);
+        return true;
+    }
+
     void colorearGrafoWP(){
         vector<Vertice<T> *> verticesOrdenados;
         for (auto & vertice: this->vertices){
@@ -686,8 +693,19 @@ public:
 
             if (coloresDisponibles.size() > 0){
                 if (verticeElegido->coloresPermitidos.size() > 0){ // SI TIENE ALGUNA RESTRICCION
-                    for (auto & colores: coloresDisponibles){
-                        if (verticeElegido->pintarVertice(colores))
+                    cout << "EL VERTICE TIENE LIMITANTES:" << verticeElegido->coloresPermitidos.size() << endl;
+                    for (auto & color: verticeElegido->coloresPermitidos){
+                        cout << " - " << color << " - ";
+                    }
+                    cout << endl;
+                    cout << "COLORES DISPONIBLES: ";
+                    for (auto & color: coloresDisponibles){
+                        cout << color << ", ";
+                    }
+                    cout << endl;
+                    for (auto & color: coloresDisponibles){
+                        cout << "\tProbando con " << color << endl;
+                        if (verticeElegido->pintarVertice(color))
                             break;
                     }
                     if (verticeElegido->valorColor == 0){

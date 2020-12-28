@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string>
+#include "horario.h"
 
 using namespace std;
 
@@ -43,6 +44,15 @@ int main(){
     string octavoSemestre[] = {"IHC", "PFCI", "CPD", "SC", "FEBTI", "RH", "FC(e)", "TIS(e)"};
     string decimoSemestre[] = {"CC", "PFC2", "TI3", "IoT", "R(e)", "TEC(e)"};
 
+    Curso c1("ED2");
+    c1.crearTipoCurso("LA");
+    c1.crearTipoCurso("TE");
+
+    c1.crearGrupoTipoCurso("TE", "a");
+    c1.crearGrupoTipoCurso("TE", "b");
+
+    c1.mostrarValores();
+/*
     Horario h1;
     h1.crearSemestre("SegundoSemestre");
     h1.crearSemestre("CuartoSemestre");
@@ -91,7 +101,7 @@ int main(){
 
 
     h1.mostrarCursos();
-
+*/
 /*
 
     Grafo<string> g1("coloracion", true);

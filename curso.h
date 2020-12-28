@@ -1,11 +1,6 @@
 #ifndef CURSO_H
 #define CURSO_H
-#include <iostream>
-#include <vector>
-#include <map>
-#include <string>
-
-using namespace std;
+#include "horario.h"
 
 class Curso{
 private:
@@ -17,7 +12,10 @@ private:
     map<string, vector<string>> tiposDeCurso;
     // Se agrupan por grupos y se enumeran los tipos
     map<string, vector<string>> gruposDeCurso;
-
+    // Se agrupan al profesor que enseña por Tipos de clases
+    map<int, vector<string>> profesorHaciaTipos;
+    // Se agrupan al profesor que enseña por Grupos de clase
+    map<int, vector<string>> profesorHaciaGrupos;
 public:
     Curso(string nombreCorto){
         this->nombreCurso = nombreCorto;
@@ -50,6 +48,62 @@ public:
 
     int asignarSemestre(int idSemestre){
         return this->semestre = idSemestre;
+    }
+
+    int encontrarDictadoDeProfesorTipo(int idProfesor, string tipoCurso){
+        if (this->profesorHaciaTipos.find(idProfesor) == this->profesorHaciaTipos.end()){
+            for (int idx = 0; idx < this->profesorHaciaTipos[idProfesor].size(); idx++){
+                if (this->profesorHaciaTipos[idProfesor][idx] == tipoCurso)
+                    return idx;
+            }
+        }
+        return -1;
+    }
+
+    int encontrarDictadoDeProfesorGrupo(int idProfesor, string grupoCurso){
+        if (this->profesorHaciaGrupos.find(idProfesor) == this->profesorHaciaGrupos.end()){
+            for (int idx = 0; idx < this->profesorHaciaGrupos[idProfesor].size(); idx++){
+                if (this->profesorHaciaGrupos[idProfesor][idx] == grupoCurso)
+                    return idx;
+            }
+        }
+        return -1;
+    }
+
+    int asignarProfesorTipo(int idProfesor, string tipoCurso){
+        if (this->tiposDeCurso.find(tipoCurso) != this->tiposDeCurso.end()){
+            int posTipo = this->encontrarDictadoDeProfesorTipo(idProfesor, tipoCurso);
+            this->profesor = -1;
+            if (posTipo < 0){
+                this->profesorHaciaTipos[idProfesor].push_back(tipoCurso);
+                return this->profesorHaciaTipos.size() - 1;
+            }
+            return posTipo;
+        }
+        return -1;
+    }
+
+    int asignarProfesorGrupo(int idProfesor, string grupoCurso){
+        if (this->gruposDeCurso.find(grupoCurso) != this->gruposDeCurso.end()){
+            int posTipo = this->encontrarDictadoDeProfesorGrupo(idProfesor, grupoCurso);
+            this->profesor = -1;
+            if (posTipo < 0){
+                this->profesorHaciaGrupos[idProfesor].push_back(grupoCurso);
+                return this->profesorHaciaGrupos.size() - 1;
+            }
+            return posTipo;
+        }
+        return -1;
+    }
+
+    bool asignarProfesorTipoGrupo(int idProfesor, string tipoCurso, string grupoCurso){
+        if (this->tiposDeCurso.find(tipoCurso) == this->tiposDeCurso.end()) return false;
+        if (this->gruposDeCurso.find(grupoCurso) == this->gruposDeCurso.end()) return false;
+        this->profesor = -1;
+        this->asignarProfesorTipo(idProfesor, grupoCurso);
+        this->asignarProfesorGrupo(idProfesor, grupoCurso);
+
+        return true;
     }
 
     void mostrarValores(){
@@ -138,6 +192,7 @@ public:
         return true;
     }
 
+    friend class Horario;
 };
 
 

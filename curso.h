@@ -16,6 +16,10 @@ private:
     map<int, vector<string>> profesorHaciaTipos;
     // Se agrupan al profesor que enseña por Grupos de clase
     map<int, vector<string>> profesorHaciaGrupos;
+
+    // Se agrupan el ID del profesor para el GRUPO y TIPO que dicta clases
+    map<int, vector<pair<string, string>>> profesorAsignado;
+
 public:
     Curso(string nombreCorto){
         this->nombreCurso = nombreCorto;
@@ -106,6 +110,31 @@ public:
         return true;
     }
 
+    int buscarAsignacionProfesor(int idProfesor, string tipoCurso, string grupoCurso){
+        if (this->profesorAsignado.find(idProfesor) == this->profesorAsignado.end()) return -1;
+        for (int idx = 0; idx < this->profesorAsignado[idProfesor].size(); idx++){
+            if (this->profesorAsignado[idProfesor][idx].first == tipoCurso && this->profesorAsignado[idProfesor][idx].second == grupoCurso)
+                return idx;
+        }
+        return -1;
+    }
+
+    int asignarProfesorAlTipoYgrupo(int idProfesor, string tipoCurso, string grupoCurso){
+        cout << "COMPROBANDO TIPO" << endl;
+        if (this->tiposDeCurso.find(tipoCurso) == this->tiposDeCurso.end()) return -1;
+        cout << "SI EXISTE TIPO" << endl;
+        if (this->gruposDeCurso.find(grupoCurso) == this->gruposDeCurso.end()) return -1;
+        cout << "SI EXISTE GRUPO" << endl;
+        this->profesor = -1;
+        int posAsignado = this->buscarAsignacionProfesor(idProfesor, tipoCurso, grupoCurso);
+        if (posAsignado < 0){
+            pair<string, string> tipoGrupoAsignado(tipoCurso, grupoCurso);
+            this->profesorAsignado[idProfesor].push_back(tipoGrupoAsignado);
+            return this->profesorAsignado[idProfesor].size() - 1;
+        }
+        return posAsignado;
+    }
+
     void mostrarValores(){
         cout << endl;
         cout << "NOMBRE CORTO: " << this->nombreCurso << endl;
@@ -125,6 +154,14 @@ public:
             cout << "\t" << grupo.first << " = ";
             for(auto & tipo: grupo.second){
                 cout << tipo << ", ";
+            }
+            cout << endl;
+        }
+        cout << "PROFESOR ASIGNADO A: " << endl;
+        for (auto & profesor: this->profesorAsignado){
+            cout << "\t" << profesor.first << " = ";
+            for (auto & asignado: profesor.second){
+                cout << "(" << asignado.first << "-" << asignado.second << "), ";
             }
             cout << endl;
         }

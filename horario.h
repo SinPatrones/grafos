@@ -184,6 +184,18 @@ public:
         return false;
     }
 
+    bool asignarProfesorAtipoYgrupo(string nombreCortoCurso, string nombreTipo, string nombreGrupo, string nombreProfesor){
+        if (!this->existeCurso(nombreCortoCurso)) return false;
+        if (this->cursos[nombreCortoCurso]->asignarProfesorAlTipoYgrupo(this->crearProfesor(nombreProfesor), nombreTipo, nombreGrupo) >= 0){
+            this->crearGrupo(nombreGrupo);
+            this->crearTipoCurso(nombreTipo);
+            cout << "Se creo tipo y grupo" << endl;
+            return true;
+        }
+        cout << "NOO Se creo tipo y grupo" << endl;
+        return false;
+    }
+
     // Asignar Semestre por nombre
     bool asignarSemestreAlCurso(string nombreCortoCurso, string nombreSemestre){
         if (this->cursos.find(nombreCortoCurso) == this->cursos.end())
@@ -242,6 +254,24 @@ public:
         return true;
     }
 
+    // Con esta función cargamos todos los datos al GRAFO
+    bool cargarDatos(){
+        this->grafo = new Grafo<string>("horario", true); // RECREAMOS el grafo
+
+
+        for (auto & curso1: this->cursos){// curso es pair<string, Curso *>
+            for (auto & curso2: this->cursos){
+                // Ejecutamos las condiciones básicas que consideramos
+                // PRIMERO, todos los que tengan el mismo profesor iran unidos por una arista
+
+
+            }
+        }
+
+        this->grafo->crearArchivoDot();
+        return true;
+
+    }
 };
 
 

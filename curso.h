@@ -16,6 +16,9 @@ private:
     // Se agrupan el ID del profesor para el GRUPO y TIPO que dicta clases
     map<int, vector<pair<string, string>>> profesorAsignado;
 
+    // Horas permitidas del curso
+    vector<int> horasPermitidas;
+
 public:
     Curso(string nombreCorto){
         this->nombreCurso = nombreCorto;
@@ -50,6 +53,27 @@ public:
         return this->semestre = idSemestre;
     }
 
+    bool tieneHora(int nuevaHora){
+        for(auto & hora: this->horasPermitidas){
+            if (hora == nuevaHora)
+                return true;
+        }
+        return false;
+    }
+
+    bool asignarUnaHoraPermitida(int nuevaHora){
+        if (!this->tieneHora(nuevaHora)){
+            this->horasPermitidas.push_back(nuevaHora);
+            return true;
+        }
+        return false;
+    }
+
+    void asignarHorasPermitidas(vector<int> listaHoras){
+        for (auto & hora: listaHoras){
+            this->asignarUnaHoraPermitida(hora);
+        }
+    }
 
 
     int buscarAsignacionProfesor(int idProfesor, string tipoCurso, string grupoCurso){

@@ -89,6 +89,10 @@ public:
         return false;
     }
 
+    void asignarColoresPermitidos(vector<int> paletaColores){
+        this->coloresPermitidos = paletaColores;
+    }
+
     // definimos a GRAFO como Amigo de la clase Vertice
     // para que pueda acceder a métodos y miembros datos privados
     friend class Grafo<T>;
@@ -681,7 +685,19 @@ public:
             }
 
             if (coloresDisponibles.size() > 0){
-                verticeElegido->valorColor = coloresDisponibles.at(0);
+                if (verticeElegido->coloresPermitidos.size() > 0){ // SI TIENE ALGUNA RESTRICCION
+                    for (auto & colores: coloresDisponibles){
+                        if (verticeElegido->pintarVertice(colores))
+                            break;
+                    }
+                    if (verticeElegido->valorColor == 0){
+                        cout << "NO SE PUEDE PINTAR" << endl;
+                        return;
+                    }
+                }else{ // SI NO LE ASIGNAMOS
+                    verticeElegido->valorColor = coloresDisponibles[0];
+                }
+
             }else{
                 cout << "NOS FALTAN COLORES";
                 return;

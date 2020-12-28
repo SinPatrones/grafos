@@ -8,14 +8,10 @@ private:
     string nombreLargoCurso;
     int semestre;
     int profesor;
-    // Se agrupan por tipo, y se enumera los grupos
-    map<string, vector<string>> tiposDeCurso;
-    // Se agrupan por grupos y se enumeran los tipos
-    map<string, vector<string>> gruposDeCurso;
-    // Se agrupan al profesor que enseña por Tipos de clases
-    map<int, vector<string>> profesorHaciaTipos;
-    // Se agrupan al profesor que enseña por Grupos de clase
-    map<int, vector<string>> profesorHaciaGrupos;
+    // Vector para guardar los tipos que tiene el curso
+    vector<string> tiposCursos;
+    // Vector para guardar los grupos que tiene el curso
+    vector<string> gruposCursos;
 
     // Se agrupan el ID del profesor para el GRUPO y TIPO que dicta clases
     map<int, vector<pair<string, string>>> profesorAsignado;
@@ -54,61 +50,7 @@ public:
         return this->semestre = idSemestre;
     }
 
-    int encontrarDictadoDeProfesorTipo(int idProfesor, string tipoCurso){
-        if (this->profesorHaciaTipos.find(idProfesor) == this->profesorHaciaTipos.end()){
-            for (int idx = 0; idx < this->profesorHaciaTipos[idProfesor].size(); idx++){
-                if (this->profesorHaciaTipos[idProfesor][idx] == tipoCurso)
-                    return idx;
-            }
-        }
-        return -1;
-    }
 
-    int encontrarDictadoDeProfesorGrupo(int idProfesor, string grupoCurso){
-        if (this->profesorHaciaGrupos.find(idProfesor) == this->profesorHaciaGrupos.end()){
-            for (int idx = 0; idx < this->profesorHaciaGrupos[idProfesor].size(); idx++){
-                if (this->profesorHaciaGrupos[idProfesor][idx] == grupoCurso)
-                    return idx;
-            }
-        }
-        return -1;
-    }
-
-    int asignarProfesorTipo(int idProfesor, string tipoCurso){
-        if (this->tiposDeCurso.find(tipoCurso) != this->tiposDeCurso.end()){
-            int posTipo = this->encontrarDictadoDeProfesorTipo(idProfesor, tipoCurso);
-            this->profesor = -1;
-            if (posTipo < 0){
-                this->profesorHaciaTipos[idProfesor].push_back(tipoCurso);
-                return this->profesorHaciaTipos.size() - 1;
-            }
-            return posTipo;
-        }
-        return -1;
-    }
-
-    int asignarProfesorGrupo(int idProfesor, string grupoCurso){
-        if (this->gruposDeCurso.find(grupoCurso) != this->gruposDeCurso.end()){
-            int posTipo = this->encontrarDictadoDeProfesorGrupo(idProfesor, grupoCurso);
-            this->profesor = -1;
-            if (posTipo < 0){
-                this->profesorHaciaGrupos[idProfesor].push_back(grupoCurso);
-                return this->profesorHaciaGrupos.size() - 1;
-            }
-            return posTipo;
-        }
-        return -1;
-    }
-
-    bool asignarProfesorTipoGrupo(int idProfesor, string tipoCurso, string grupoCurso){
-        if (this->tiposDeCurso.find(tipoCurso) == this->tiposDeCurso.end()) return false;
-        if (this->gruposDeCurso.find(grupoCurso) == this->gruposDeCurso.end()) return false;
-        this->profesor = -1;
-        this->asignarProfesorTipo(idProfesor, grupoCurso);
-        this->asignarProfesorGrupo(idProfesor, grupoCurso);
-
-        return true;
-    }
 
     int buscarAsignacionProfesor(int idProfesor, string tipoCurso, string grupoCurso){
         if (this->profesorAsignado.find(idProfesor) == this->profesorAsignado.end()) return -1;
@@ -119,17 +61,49 @@ public:
         return -1;
     }
 
+    // Usando PAIR para asignar tipo dentro del MAP de PROFESORES_ASIGNADOS
+    int asignarProfesorSoloAlTipo(int idProfesor, string tipoCurso){
+        this->profesor = -1;
+        int posAsignado = this->buscarAsignacionProfesor(idProfesor, tipoCurso, "");
+        if (posAsignado < 0){
+            pair<string, string> tipoGrupoAsignado(tipoCurso, "");
+            this->profesorAsignado[idProfesor].push_back(tipoGrupoAsignado);
+            if (this->encontrarTipoCurso(tipoCurso) < 0){
+                this->tiposCursos.push_back(tipoCurso);
+            }
+            return this->profesorAsignado[idProfesor].size() - 1;
+        }
+        return posAsignado;
+    }
+
+    // Usando PAIR para asignar grupo dentro del MAP de PROFESORES_ASIGNADOS
+    int asignarProfesorSoloAlGrupo(int idProfesor, string grupoCurso){
+        this->profesor = -1;
+        int posAsignado = this->buscarAsignacionProfesor(idProfesor, "", grupoCurso);
+        if (posAsignado < 0){
+            pair<string, string> tipoGrupoAsignado("", grupoCurso);
+            this->profesorAsignado[idProfesor].push_back(tipoGrupoAsignado);
+            if (this->encontrarGrupoCurso(grupoCurso) < 0){
+                this->gruposCursos.push_back(grupoCurso);
+            }
+            return this->profesorAsignado[idProfesor].size() - 1;
+        }
+        return posAsignado;
+    }
+
+    // Usando PAIR para asignar tipo y grupo dentro del MAP de PROFESORES_ASIGNADOS
     int asignarProfesorAlTipoYgrupo(int idProfesor, string tipoCurso, string grupoCurso){
-        cout << "COMPROBANDO TIPO" << endl;
-        if (this->tiposDeCurso.find(tipoCurso) == this->tiposDeCurso.end()) return -1;
-        cout << "SI EXISTE TIPO" << endl;
-        if (this->gruposDeCurso.find(grupoCurso) == this->gruposDeCurso.end()) return -1;
-        cout << "SI EXISTE GRUPO" << endl;
         this->profesor = -1;
         int posAsignado = this->buscarAsignacionProfesor(idProfesor, tipoCurso, grupoCurso);
         if (posAsignado < 0){
             pair<string, string> tipoGrupoAsignado(tipoCurso, grupoCurso);
             this->profesorAsignado[idProfesor].push_back(tipoGrupoAsignado);
+            if (this->encontrarTipoCurso(tipoCurso) < 0){
+                this->tiposCursos.push_back(tipoCurso);
+            }
+            if (this->encontrarGrupoCurso(grupoCurso) < 0){
+                this->gruposCursos.push_back(grupoCurso);
+            }
             return this->profesorAsignado[idProfesor].size() - 1;
         }
         return posAsignado;
@@ -141,22 +115,16 @@ public:
         cout << "NOMBRE LARGO: " << this->nombreLargoCurso << endl;
         cout << "ID PROFESOR: " << this->profesor << endl;
         cout << "NUMERO DE SEMESTRE: " << this->semestre << endl;
-        cout << "TIPOS CREADOS: " << endl;
-        for(auto & tipo: this->tiposDeCurso){
-            cout << "\t" << tipo.first << " = ";
-            for(auto & grupo: tipo.second){
-                cout << grupo << ", ";
-            }
-            cout << endl;
+        cout << "TIPOS CREADOS: ";
+        for(auto & tipo: this->tiposCursos){
+            cout << tipo << ", ";
         }
-        cout << "GRUPOS CREADOS: " << endl;
-        for(auto & grupo: this->gruposDeCurso){
-            cout << "\t" << grupo.first << " = ";
-            for(auto & tipo: grupo.second){
-                cout << tipo << ", ";
-            }
-            cout << endl;
+        cout << endl;
+        cout << "GRUPOS CREADOS: ";
+        for(auto & grupo: this->gruposCursos){
+            cout << grupo << ", ";
         }
+        cout << endl;
         cout << "PROFESOR ASIGNADO A: " << endl;
         for (auto & profesor: this->profesorAsignado){
             cout << "\t" << profesor.first << " = ";
@@ -168,65 +136,18 @@ public:
         cout << endl;
     }
 
-    bool crearTipoCurso(string nombreTipo){
-        if (this->tiposDeCurso.find(nombreTipo) == this->tiposDeCurso.end()){
-            vector<string> grupo;
-            this->tiposDeCurso[nombreTipo] = grupo;
-        }
-        return true;
-    }
-
-    bool crearGrupoCurso(string nombreGrupo){
-        if (this->gruposDeCurso.find(nombreGrupo) == this->gruposDeCurso.end()){
-            vector<string> grupo;
-            this->gruposDeCurso[nombreGrupo] = grupo;
-        }
-        return true;
-    }
-
-    // Encontrar si existe un grupo dentro del tipo de curso
-    int encontrarGrupoEnTipo(string tipoCurso, string nombreGrupo){
-        if (this->tiposDeCurso.find(tipoCurso) != this->tiposDeCurso.end()){
-            vector<string> gruposDelTipo = this->tiposDeCurso[tipoCurso];
-            for (size_t idx = 0; idx < gruposDelTipo.size(); idx++){
-                if (nombreGrupo == gruposDelTipo[idx])
-                    return idx;
-            }
-        }
+    int encontrarTipoCurso(string tipoCurso){
+        for (int idx = 0; idx < this->tiposCursos.size(); idx++)
+            if (this->tiposCursos[idx] == tipoCurso)
+                return idx;
         return -1;
     }
 
-    // Función para agregar un grupo al tipo de curso
-    bool crearGrupoTipoCurso(string tipoSeleccionado, string nombreGrupo){
-        if (this->encontrarGrupoEnTipo(tipoSeleccionado, nombreGrupo) < 0){
-            this->tiposDeCurso[tipoSeleccionado].push_back(nombreGrupo);
-        }
-        if (this->encontrarTipoEnGrupo(nombreGrupo, tipoSeleccionado) < 0){
-            this->gruposDeCurso[nombreGrupo].push_back(tipoSeleccionado);
-        }
-        return true;
-    }
-
-    int encontrarTipoEnGrupo(string grupoCurso, string nombreTipo){
-        if (this->gruposDeCurso.find(grupoCurso) != this->gruposDeCurso.end()){
-            vector<string> tiposDelGrupo = this->gruposDeCurso[grupoCurso];
-            for (size_t idx = 0; idx < tiposDelGrupo.size(); idx++){
-                if (nombreTipo == tiposDelGrupo[idx])
-                    return idx;
-            }
-        }
+    int encontrarGrupoCurso(string grupoCurso){
+        for(int idx = 0; idx < this->gruposCursos.size(); idx++)
+            if (this->gruposCursos[idx] == grupoCurso)
+                return idx;
         return -1;
-    }
-
-    // Función para crear un tipo de curso a un grupo
-    bool crearTipoGrupoCurso(string grupoSeleccionado, string nombreTipo){
-        if (this->encontrarTipoEnGrupo(grupoSeleccionado, nombreTipo) < 0){
-            this->gruposDeCurso[grupoSeleccionado].push_back(nombreTipo);
-        }
-        if (this->encontrarGrupoEnTipo(nombreTipo, grupoSeleccionado) < 0){
-            this->tiposDeCurso[nombreTipo].push_back(grupoSeleccionado);
-        }
-        return true;
     }
 
     friend class Horario;

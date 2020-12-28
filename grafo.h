@@ -269,7 +269,8 @@ public:
                 default:
                     color = "";
                 }
-                salida << "\"" << vertice.second << "\"" << " [fixedsize=true label=\"" << vertice.first << "\"" << color << "]" << ";\n";
+                //salida << "\"" << vertice.second << "\"" << " [fixedsize=true label=\"" << vertice.first << "\"" << color << "]" << ";\n";
+                salida << "\"" << vertice.second << "\"" << " [label=\"" << vertice.first << "\"" << color << "]" << ";\n";
             }
 
             if (!this->dirigido){

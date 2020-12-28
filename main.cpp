@@ -44,31 +44,29 @@ int main(){
     string octavoSemestre[] = {"IHC", "PFCI", "CPD", "SC", "FEBTI", "RH", "FC(e)", "TIS(e)"};
     string decimoSemestre[] = {"CC", "PFC2", "TI3", "IoT", "R(e)", "TEC(e)"};
 
-    Horario h1;
+    Horario h1(colores);
 
     h1.crearCurso("ED2");
     h1.crearCurso("CC1");
     h1.crearCurso("C1V");
     h1.crearCurso("ITP2");
+    h1.crearCurso("RN");
+    h1.crearCurso("CI");
 
     h1.crearCurso("AED");
     h1.crearCurso("TC");
     h1.crearCurso("BD2");
     h1.crearCurso("ALN");
 
-    h1.crearGrupoAlTipo("ED2", "TE", "a");
-    h1.crearGrupoAlTipo("ED2", "LA", "a");
-    h1.crearGrupoAlTipo("ED2", "TE", "b");
-    h1.crearGrupoAlTipo("ED2", "LA", "b");
-    h1.crearGrupoAlTipo("C1V", "TE", "a");
-    h1.crearGrupoAlTipo("C1V", "TE", "b");
-    h1.crearGrupoAlTipo("CC1", "TE", "b");
-    h1.crearGrupoAlTipo("CC1", "TE", "a");
+    //h1.crearSoloGrupoAlCurso("C1V", "a");
+    //h1.crearSoloGrupoAlCurso("C1V", "b");
 
     h1.asignarSemestreAlCurso("ED2", "PrimerSemestre");
     h1.asignarSemestreAlCurso("C1V", "PrimerSemestre");
     h1.asignarSemestreAlCurso("CC1", "PrimerSemestre");
     h1.asignarSemestreAlCurso("ITP2", "PrimerSemestre");
+    h1.asignarSemestreAlCurso("RN", "PrimerSemestre");
+    h1.asignarSemestreAlCurso("CI", "PrimerSemestre");
 
     h1.asignarSemestreAlCurso("AED", "SegundoSemestre");
     h1.asignarSemestreAlCurso("TC", "SegundoSemestre");
@@ -80,17 +78,21 @@ int main(){
     h1.asignarProfesorAtipoYgrupo("ED2", "TE", "b", "Luis");
     h1.asignarProfesorAtipoYgrupo("ED2", "LA", "a", "Carlos");
     h1.asignarProfesorAtipoYgrupo("ED2", "LA", "b", "Luis");
+    h1.asignarProfesorAtipoYgrupo("C1V", "TE", "a", "Diego");
+    h1.asignarProfesorAtipoYgrupo("C1V", "TE", "b", "Diego");
+    h1.asignarProfesorAtipoYgrupo("C1V", "LA", "a", "Diego");
+    h1.asignarProfesorAtipoYgrupo("C1V", "LA", "b", "Diego");
+    h1.asignarProfesorAtipoYgrupo("CI", "", "a", "Maria");
 
-    h1.asignarProfesorAtipoYgrupo("CC1", "TE", "a", "Pedro");
-    h1.asignarProfesorAtipoYgrupo("CC1", "TE", "b", "Pedro");
+    h1.asignarProfesorAtipoYgrupo("CC1", "TE", "", "Pedro");
 
-    h1.asignarProfesorAlCurso("CC1", "Carlos");
-    h1.asignarProfesorAlCurso("C1V", "Diego");
     h1.asignarProfesorAlCurso("ITP2", "Luis");
+    h1.asignarProfesorAlCurso("AED", "Luis");
+    h1.asignarProfesorAlCurso("TC", "Luis");
 
 
     h1.mostrarInfoHorario();
-    //h1.cargarDatos();
+    h1.cargarDatos();
 
 
 /*

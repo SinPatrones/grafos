@@ -49,12 +49,14 @@ private:
     vector<Arista<T> *> aristas; // Una lista de ARISTAS - Ver la Clase Arista
     int valorColor = sincolor;  // El color que se le asigne
     vector<int> coloresPermitidos;
+    float peso;
 
 public:
     Vertice(T valor){
         this->valor = valor;
         this->gradoPositivo = 0;
         this->gradoNegativo = 0;
+        this->peso = 0;
     }
     vector<Arista<T> *> obtenerAristas(){
         return this->aristas;
@@ -74,6 +76,7 @@ public:
         return this;
     }
 
+    // verificar que un color este en la lista de colores permitidos
     bool esColorPermitido(int colorPrueba){
         for(auto & color: this->coloresPermitidos){
             if (colorPrueba == color)
@@ -82,6 +85,7 @@ public:
         return false;
     }
 
+    // método para asignar una etiqueta al vertice
     bool pintarVertice(int colorNuevo){
         if (this->esColorPermitido(colorNuevo)){
             this->valorColor = colorNuevo;
@@ -90,8 +94,21 @@ public:
         return false;
     }
 
+    // método para poder asignar una vector de colores al vertice
     void asignarColoresPermitidos(vector<int> paletaColores){
         this->coloresPermitidos = paletaColores;
+    }
+
+    void calcularPesoVertice(){
+        for (auto & arista: this->aristas){
+            if (this->peso < arista->obtenerPeso()){
+                this->peso = arista->obtenerPeso();
+            }
+        }
+    }
+
+    int obtenerPeso(){
+        return this->peso;
     }
 
     // definimos a GRAFO como Amigo de la clase Vertice
@@ -388,6 +405,8 @@ public:
                         ++(*inicioEncontrado);
                     }
                     this->cantidadAristas++;
+                    inicioEncontrado->calcularPesoVertice();
+                    finEncontrado->calcularPesoVertice();
                     return true;
                 }
             }else{ // si no se encuentra el nodo final
@@ -403,6 +422,8 @@ public:
                         ++(*inicioEncontrado);
                     }
                     this->cantidadAristas++;
+                    verticeFinal->calcularPesoVertice();
+                    inicioEncontrado->calcularPesoVertice();
                     return true;
                 }
                 return false;
@@ -420,6 +441,8 @@ public:
                     ++(*nuevoInicio);
                 }
                 this->cantidadAristas++;
+                nuevoInicio->calcularPesoVertice();
+                nuevoFin->calcularPesoVertice();
                 return true;
             }
         }

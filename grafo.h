@@ -589,96 +589,10 @@ public:
         entrada.close();
     }
 
-    // IMPLEMENTACIÓN DEL ALGORIMO VORAZ
-    void colorearGrafoVoraz(){
-        vector<T> verticesOrdenados = {1,2,3,4,5,6,7};
-        vector<Color> coloresOrdenados = {verde, rojo, amarillo};
-
-        // Coloreando el primer vertice
-        this->vertices[verticesOrdenados.at(0)]->valorColor = verde;
-        cout << "VERTICE : " << this->vertices[verticesOrdenados.at(0)]->valor << " = " << this->vertices[verticesOrdenados.at(0)]->valorColor;
-        cout << endl << endl;
-        for (int idx = 1; idx < verticesOrdenados.size(); idx++){
-            Vertice<T> * nodoElegido = this->vertices[verticesOrdenados.at(idx)];
-            vector<Color> coloresDisponibles; // vamos a agrupar los colores disponibles
-            for (int idx_c = 0; idx_c < coloresOrdenados.size(); idx_c++){
-                // Vamos a recorrer los vertices adyacentes
-                bool existe = false;
-                for (auto & arista: nodoElegido->aristas){ // peso, Vertice<T> *
-                    if (arista->extremo->valorColor == coloresOrdenados.at(idx_c)){
-                        existe = true;
-                        break;
-                    }
-                }
-                if (!existe){
-                    coloresDisponibles.push_back(coloresOrdenados.at(idx_c));
-                }
-            }
-            if (coloresDisponibles.size() > 0){
-                nodoElegido->valorColor = coloresDisponibles.at(0);
-            }else{
-                cout << "NOS FALTAN COLORES";
-                return;
-            }
-        }
-
-        // mostrando los colores pintados
-        for (auto & vertice: this->vertices){
-            cout << "El color del vertice " << vertice.first << " = " << vertice.second->valorColor << endl;
-        }
-    }
-
     bool asignarColoresPermitidos(T vertice, vector<int> colores){
         if (this->vertices.find(vertice) == this->vertices.end()) return false;
         this->vertices[vertice]->asignarColoresPermitidos(colores);
         return true;
-    }
-
-    void colorearGrafoWP(){
-        vector<Vertice<T> *> verticesOrdenados;
-        for (auto & vertice: this->vertices){
-            verticesOrdenados.push_back(vertice.second); // Vertice<T> *
-        }
-        // Función para ordenar los vetices en base a su grado          | Función Lambda / Función Anonima
-        sort(verticesOrdenados.begin(), verticesOrdenados.end(), [] (Vertice<T> * a, Vertice<T> * b){
-            return a->aristas.size() > b->aristas.size();
-        });
-        vector<Color> coloresOrdenados = {verde, rojo, amarillo};
-
-        // Coloreando el primer vertice
-        this->vertices[verticesOrdenados.at(0)->valor]->valorColor = coloresOrdenados.at(0);
-        cout << "VERTICE : " << this->vertices[verticesOrdenados.at(0)->valor]->valor << " = " << this->vertices[verticesOrdenados.at(0)->valor]->valorColor;
-        cout << endl << endl;
-        for (int idx = 1; idx < verticesOrdenados.size(); idx++){
-            Vertice<T> * nodoElegido = this->vertices[verticesOrdenados.at(idx)->valor];
-            vector<Color> coloresDisponibles; // vamos a agrupar los colores disponibles
-
-            for (int idx_c = 0; idx_c < coloresOrdenados.size(); idx_c++){
-                // Vamos a recorrer los vertices adyacentes
-                bool existe = false;
-                for (Arista<T> * & arista: nodoElegido->aristas){ // peso, Vertice<T> *
-                    if (arista->extremo->valorColor == coloresOrdenados.at(idx_c)){
-                        existe = true;
-                        break;
-                    }
-                }
-                if (!existe){
-                    coloresDisponibles.push_back(coloresOrdenados.at(idx_c));
-                }
-            }
-
-            if (coloresDisponibles.size() > 0){
-                nodoElegido->valorColor = coloresDisponibles.at(0);
-            }else{
-                cout << "NOS FALTAN COLORES";
-                return;
-            }
-        }
-
-        // mostrando los colores pintados
-        for (auto & vertice: this->vertices){
-            cout << "El color del vertice " << vertice.first << " = " << vertice.second->valorColor << endl;
-        }
     }
 
     void ordenadoDeVertices(){

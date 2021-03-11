@@ -681,6 +681,29 @@ public:
         }
     }
 
+    void ordenadoDeVertices(){
+        vector<Vertice<T> *> verticesOrdenados; // Creamos un vector de vertices el cuales ordenaremos segun su grado
+        for (auto & vertice: this->vertices){
+            cout << vertice.second->obtenerValor() << ", ";
+            verticesOrdenados.push_back(vertice.second); // Vertice<T> * | insertamos todos los vertices del grafo (aún desordenados)
+        }
+        cout << "INSERTADO" << endl;
+        // Función para ordenar los vetices en base a su grado          | Función Lambda / Función Anonima
+        sort(verticesOrdenados.begin(), verticesOrdenados.end(), [] (Vertice<T> * a, Vertice<T> * b){
+            if (a->aristas.size() == b->aristas.size()){
+                return a->obtenerPeso() > b->obtenerPeso();
+            }else{
+                return a->aristas.size() > b->aristas.size();   // en base a la cantidad de aristas que tengan(grado)
+            }
+        });
+
+        cout << endl << endl;
+        for (auto & vertice: verticesOrdenados){
+            cout << vertice->obtenerValor() << " = " << vertice->obtenerPeso() << endl;
+        }
+        cout << endl;
+    }
+
     void colorearHorario(vector<int> paleta){
         vector<Vertice<T> *> verticesOrdenados; // Creamos un vector de vertices el cuales ordenaremos segun su grado
         for (auto & vertice: this->vertices){
@@ -688,7 +711,11 @@ public:
         }
         // Función para ordenar los vetices en base a su grado          | Función Lambda / Función Anonima
         sort(verticesOrdenados.begin(), verticesOrdenados.end(), [] (Vertice<T> * a, Vertice<T> * b){
-            return a->aristas.size() > b->aristas.size();   // en base a la cantidad de aristas que tengan(grado)
+            if (a->aristas.size() == b->aristas.size()){
+                a->obtenerPeso() > b->obtenerPeso();
+            }else{
+                return a->aristas.size() > b->aristas.size();   // en base a la cantidad de aristas que tengan(grado)
+            }
         });
 
         // Coloreando el primer vertice que esta en el vector de VERTICES ORDENADOS

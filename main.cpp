@@ -40,20 +40,18 @@ vector<int> colores = {
 int main(){
     Grafo<string> g1("nuevo", true, false, false, true);
 
-    g1.insertarVertice("Armando");
-    g1.insertarVertice("Juan");
-    g1.insertarVertice("Stephany");
-    g1.insertarVertice("Diego");
-    g1.insertarVertice("Andres");
-
     g1.insertarArista("Armando", "Juan", 6);
     g1.insertarArista("Armando", "Stephany", 5);
     g1.insertarArista("Diego", "Juan", 3);
-    g1.insertarArista("Juan", "Andres", 2);
+    g1.insertarArista("Juan", "Andres", 4);
+    g1.insertarArista("Juan", "Stephany", 2);
+    g1.insertarArista("Pepe", "Andres", 4);
+    g1.insertarArista("Diego", "Pepe", 1);
+    g1.insertarArista("Juan", "Lucia", 6);
+    g1.insertarArista("Stephany", "Pepe", 6);
 
-    cout << "PESO Armando: " << g1.encontrarVertice("Armando")->obtenerPeso() << endl;
-    cout << "PESO Diego: " << g1.encontrarVertice("Diego")->obtenerPeso() << endl;
 
+    g1.ordenadoDeVertices();
     g1.crearArchivoDot();
 
     return 1;

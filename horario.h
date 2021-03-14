@@ -55,6 +55,7 @@ private:
 
 public:
     Horario(vector<int> paleta){
+        cout << "----- CREANDO HORARIO -------" << endl;
         this->grafo = nullptr;
         this->cantidadCursos = 0;
         this->paleta = paleta;
@@ -252,12 +253,12 @@ public:
         return true;
     }
 
-
     // Con esta función cargamos todos los datos al GRAFO
-    bool cargarDatos(){
+    bool cargarDatos(unsigned int cantidadSalones){
         this->grafo = new Grafo<string>("horario", true); // RECREAMOS el grafo
         map<string, Curso *> nombresCursos;
 
+        this->grafo->asignarRepeticionDeColor(cantidadSalones);
 
         for (auto & curso1: this->cursos){// curso es pair<string, Curso *>
             // Vamos a estructurar el VERTICES para insertar en el grafo

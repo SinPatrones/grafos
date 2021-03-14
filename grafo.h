@@ -111,6 +111,10 @@ public:
         return this->peso;
     }
 
+    int obtenerColor(){
+        return this->valorColor;
+    }
+
     // definimos a GRAFO como Amigo de la clase Vertice
     // para que pueda acceder a métodos y miembros datos privados
     friend class Grafo<T>;
@@ -180,6 +184,7 @@ private:
     bool permitirLazos;
     bool autoinsertar;
     bool ponderado;
+    unsigned int repeticiones;
     string nombreArchivo;
     vector<T> valoresVertices; // Lista de solo nombres de VERTICES
 public:
@@ -192,6 +197,8 @@ public:
         this->autoinsertar = autoinsertar; // Si se inserta una arista con Vertices que no existen, pues se crearan en ese instante
         this->ponderado = ponderado;
         this->nombreArchivo = nombreArchivo;
+        this->repeticiones = 1;
+        cout << "CONSTRUCTO: " << this->repeticiones << endl;
     }
 
     // Constructor copia
@@ -490,6 +497,7 @@ public:
         this->ponderado = otro.ponderado;
         this->valoresVertices = otro.valoresVertices;
         this->nombreArchivo = otro.nombreArchivo + "_copia";
+        this->repeticiones = otro.repeticiones;
 
         for (auto & vertice: otro.vertices){
             for (auto & arista: vertice.second->aristas){
@@ -618,12 +626,19 @@ public:
         cout << endl;
     }
 
+    void asignarRepeticionDeColor(unsigned int nRepeticiones){
+        cout << "_#_#_# CANTIDAD DE REPECIONES EN GRAFO" << endl;
+        cout << nRepeticiones << " - " << this->repeticiones << endl;
+        this->repeticiones = nRepeticiones;
+        cout << "_#_#_# CANTIDAD DE REPECIONES EN GRAFO" << endl;
+    }
+
     void colorearHorario(vector<int> paleta){
         vector<Vertice<T> *> verticesOrdenados; // Creamos un vector de vertices el cuales ordenaremos segun su grado
         for (auto & vertice: this->vertices){
             verticesOrdenados.push_back(vertice.second); // Vertice<T> * | insertamos todos los vertices del grafo (aún desordenados)
         }
-        // Función para ordenar los vetices en base a su grado          | Función Lambda / Función Anonima
+        // Función para ordenar los vertices en base a su grado          | Función Lambda / Función Anonima
         sort(verticesOrdenados.begin(), verticesOrdenados.end(), [] (Vertice<T> * a, Vertice<T> * b){
             if (a->aristas.size() == b->aristas.size()){
                 a->obtenerPeso() > b->obtenerPeso();
@@ -632,58 +647,57 @@ public:
             }
         });
 
+        // creamos el vector de colores pero con la cantidad de veces que se puede repetir
+        vector<pair<int, int>> paletaColores;
+        for(auto & color: paleta){
+            pair<int,int> nColor = pair(color, this->repeticiones);
+            paletaColores.push_back(nColor);
+        }
+
         // Coloreando el primer vertice que esta en el vector de VERTICES ORDENADOS
-        this->vertices[verticesOrdenados.at(0)->valor]->valorColor = paleta.at(0);
+        this->vertices[verticesOrdenados.at(0)->valor]->valorColor = paletaColores.at(0).first;
+        paletaColores.at(0).second--;
+
+        cout << "## EL PRIMER VERTICE PINTADO: " << verticesOrdenados.at(0)->valor << " con color: " << paletaColores.at(0).first << endl;
+        cout << "-->" << paletaColores.at(0).first << " - " << paletaColores.at(0).second << endl;
 
         // Para cada vertices en el vector de vertices ordenados, excepto el primero
         for (int idx = 1; idx < verticesOrdenados.size(); idx++){
             // Seleccionamos el siguiente vertice a colorear
-            Vertice<T> * verticeElegido = this->vertices[verticesOrdenados.at(idx)->valor];
-            vector<int> coloresDisponibles; // vamos a agrupar los colores disponibles, los que no son adyacentes al vertices escogido
+            Vertice<T> * verticeElegido = verticesOrdenados.at(idx);
+            cout << "EMPEZAMOS CON " << verticeElegido->obtenerValor() << endl;
 
-            for (int idx_c = 0; idx_c < paleta.size(); idx_c++){
-                // Vamos a recorrer los vertices adyacentes
-                bool existe = false;
-                for (Arista<T> * & arista: verticeElegido->aristas){ // peso, Vertice<T> *
-                    if (arista->extremo->valorColor == paleta.at(idx_c)){
-                        existe = true;
-                        break;
-                    }
-                }
-                if (!existe){
-                    coloresDisponibles.push_back(paleta.at(idx_c));
-                }
-            }
-
-            if (coloresDisponibles.size() > 0){
-                if (verticeElegido->coloresPermitidos.size() > 0){ // SI TIENE ALGUNA RESTRICCION
-                    cout << "EL VERTICE TIENE LIMITANTES:" << verticeElegido->coloresPermitidos.size() << endl;
-                    for (auto & color: verticeElegido->coloresPermitidos){
-                        cout << " - " << color << " - ";
-                    }
-                    cout << endl;
-                    cout << "COLORES DISPONIBLES: ";
-                    for (auto & color: coloresDisponibles){
-                        cout << color << ", ";
-                    }
-                    cout << endl;
-                    for (auto & color: coloresDisponibles){
-                        cout << "\tProbando con " << color << endl;
-                        if (verticeElegido->pintarVertice(color))
+            // Recorremos en la paleta de colores
+            for (int idxColor = 0; idxColor < paletaColores.size(); idxColor++){
+                // preguntamos si aún hay cantidad de color disponible
+                cout << "\tEstado de color propuesto: " << paletaColores.at(idxColor).first << " - " << paletaColores.at(idxColor).second << endl;
+                if (paletaColores.at(idxColor).second > 0){
+                    cout << "\tEl color: " << paletaColores.at(idxColor).first << " tiene: " << paletaColores.at(idxColor).second << endl;
+                    bool colorDisponible = true;
+                    // Recorremos las aristas del vertice elegido para colorear
+                    for(Arista<T> * & arista: verticeElegido->aristas){
+                        cout << "\t\tArista: " << arista->obtenerExtremo()->obtenerValor() << " su color es " << arista->obtenerExtremo()->obtenerColor() << endl;
+                        if (arista->obtenerExtremo()->obtenerColor() == paletaColores.at(idxColor).first){
+                            cout << "\t\t##El color " << paletaColores.at(idxColor).first << "(" << paletaColores.at(idxColor).second << ") es adyacente" << endl;
+                            colorDisponible = false;
                             break;
+                        }
                     }
-                    if (verticeElegido->valorColor == 0){
-                        cout << "NO SE PUEDE PINTAR" << endl;
-                        return;
-                    }
-                }else{ // SI NO LE ASIGNAMOS
-                    verticeElegido->valorColor = coloresDisponibles[0];
-                }
+                    if(colorDisponible){
+                        cout << "\t##PINTAREMOS CON EL color " << paletaColores.at(idxColor).first << "(" << paletaColores.at(idxColor).second << ") es adyacente" << endl;
+                        if (verticeElegido->pintarVertice(paletaColores.at(idxColor).first)){ // Pintamos con el color
+                            paletaColores.at(idxColor).second--; // Disminuimos su cantidad
+                            cout << "\tCOLOR --> DESPUES DE PINTAR: " << verticeElegido->obtenerValor() << " - " << verticeElegido->obtenerColor() << endl;
+                            break;
+                        }
 
-            }else{
-                cout << "NOS FALTAN COLORES";
-                return;
+                    }
+                }else{
+                    continue;
+                }
             }
+            cout << "DESPUES DE PINTAR: " << verticeElegido->obtenerValor() << " - " << verticeElegido->obtenerColor() << endl;
+
         }
 
         // mostrando los colores pintados
